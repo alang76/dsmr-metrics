@@ -1,4 +1,10 @@
-module PrometheusMetricsServer where
+{-# LANGUAGE OverloadedStrings #-}
+
+module PrometheusMetricsServer
+    (   incCounter,
+        pageVisits,
+        runMetricsServer
+    ) where
 
 import Network.Wai.Handler.Warp (run)
 import Network.HTTP.Types (status200)
@@ -9,6 +15,9 @@ import qualified Network.Wai as Wai
 import qualified Network.Wai.Middleware.Prometheus as P
 import qualified Prometheus as P
 import qualified Prometheus.Metric.GHC as P
+
+incCounter :: P.Counter -> IO ()
+incCounter ctr = P.incCounter ctr 
 
 pageVisits :: P.Counter
 pageVisits = P.unsafeRegister

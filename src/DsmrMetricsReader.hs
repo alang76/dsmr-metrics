@@ -1,5 +1,6 @@
 module DsmrMetricsReader
-    ( readMetrics
+    ( readMetrics,
+      DsmrMetric(PowerConsumedTariff1, PowerConsumedTariff2, PowerReturnedTariff1, PowerReturnedTariff2)
     ) where
 
 import Control.Concurrent
