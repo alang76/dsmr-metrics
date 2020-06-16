@@ -4,8 +4,9 @@ import DsmrMetricsReader as DMR
 import PrometheusMetricsServer as PS
 import qualified Control.Concurrent.Async as Async
 
-processMetricsCallback :: DMR.DsmrMetric -> IO ()
-processMetricsCallback (PowerConsumedTariff1 amount) = PS.incCounter pageVisits
+processMetricsCallback :: DMR.DsmrTelegram -> IO ()
+processMetricsCallback (DsmrTelegram _ [PowerConsumedTariff1 amount] _)  = PS.incCounter pageVisits
+processMetricsCallback (DsmrTelegram _ _ _)  = PS.incCounter pageVisits
 
 main :: IO ()
 main = do

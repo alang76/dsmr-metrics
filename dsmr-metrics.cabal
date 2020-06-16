@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4d8c4840cc1e4fb7710277916a743015e07e6eeb2af33593b1fddd0fc28bf766
+-- hash: fa839c409cc32f316c4e6530762d3fb85041b892a8e54ef15e66bcf1f64c8a9d
 
 name:           dsmr-metrics
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       DsmrMetricsReader
+      DsmrMetricsReader.Internal
       Lib
       PrometheusMetricsServer
   other-modules:
@@ -39,9 +40,11 @@ library
     , base >=4.13 && <4.14
     , bytestring >=0.10.10.0 && <0.11
     , http-types >=0.12.3 && <0.13
+    , lens >=4.18.1 && <4.19
     , megaparsec >=8.0.0 && <8.1
     , prometheus-client >=1.0.0.1 && <1.1
     , prometheus-metrics-ghc >=1.0.1 && <1.1
+    , safe >=0.3.19 && <0.4
     , time >=1.9.3 && <1.10
     , wai >=3.2.2.1 && <3.3
     , wai-middleware-prometheus >=1 && <1.1
@@ -61,9 +64,11 @@ executable dsmr-metrics-exe
     , bytestring >=0.10.10.0 && <0.11
     , dsmr-metrics
     , http-types >=0.12.3 && <0.13
+    , lens >=4.18.1 && <4.19
     , megaparsec >=8.0.0 && <8.1
     , prometheus-client >=1.0.0.1 && <1.1
     , prometheus-metrics-ghc >=1.0.1 && <1.1
+    , safe >=0.3.19 && <0.4
     , time >=1.9.3 && <1.10
     , wai >=3.2.2.1 && <3.3
     , wai-middleware-prometheus >=1 && <1.1
@@ -79,14 +84,18 @@ test-suite dsmr-metrics-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      async >=2.2.2 && <2.3
+      QuickCheck >=2.13.2 && <2.14
+    , async >=2.2.2 && <2.3
     , base >=4.13 && <4.14
     , bytestring >=0.10.10.0 && <0.11
     , dsmr-metrics
+    , hspec >=2.7.1 && <2.8
     , http-types >=0.12.3 && <0.13
+    , lens >=4.18.1 && <4.19
     , megaparsec >=8.0.0 && <8.1
     , prometheus-client >=1.0.0.1 && <1.1
     , prometheus-metrics-ghc >=1.0.1 && <1.1
+    , safe >=0.3.19 && <0.4
     , time >=1.9.3 && <1.10
     , wai >=3.2.2.1 && <3.3
     , wai-middleware-prometheus >=1 && <1.1
