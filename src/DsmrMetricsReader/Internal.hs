@@ -26,7 +26,7 @@ type Checksum = Integer
 
 data DsmrField =
       VersionNumber                 {_versionNumber                  :: Integer}
-    | Timestamp                     {_timeStamp                      :: UTCTime}
+    | TimeStamp                     {_timeStamp                      :: UTCTime}
     | EquipmentID                   {_equipmentID                    :: String}
     | EnergyConsumedTariff1         {_energyConsumedTariff1          :: Double}               --kilo Watt hour
     | EnergyConsumedTariff2         {_energyConsumedTariff2          :: Double}               --kilo Watt hour
@@ -110,7 +110,7 @@ valueParensParserP valParser = do
   return val
 
 versionfieldParserP                       = fieldParserP "1-3:0.2.8"      valueIntegerParserP     VersionNumber
-timestampfieldParserP                     = fieldParserP "0-0:1.0.0"      valueTimestampParserP   Timestamp
+timestampfieldParserP                     = fieldParserP "0-0:1.0.0"      valueTimestampParserP   TimeStamp
 equipmentIDfieldParserP                   = fieldParserP "0-0:96.1.1"     valueStringParserP      EquipmentID
 powerConsumedTariff1fieldParserP          = fieldParserP "1-0:1.8.1"      valueEnergyParserP      EnergyConsumedTariff1
 powerConsumedTariff2fieldParserP          = fieldParserP "1-0:2.8.1"      valueEnergyParserP      EnergyConsumedTariff2

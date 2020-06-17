@@ -3,7 +3,8 @@ import Test.QuickCheck (property)
 import Control.Exception (evaluate)
 import Data.Maybe (isJust)
 import Data.Void (Void)
-import Control.Lens ((&), (^..), (^.))
+import Control.Lens --((&), (^..), (^.), Lens')
+import Control.Lens.Getter
 import Control.Lens.Prism (_Right, _Just)
 import Text.Megaparsec (ParseErrorBundle)
 import DsmrMetricsReader.Internal
@@ -73,76 +74,72 @@ Meter ID: LGBBFFB231215493
 main :: IO ()
 main = do
   parsedTelegram <- runDsmrParserPrintError testTelegram
+
   hspec $
     describe "DsmrTelegramParser" $ do
     it "telegram can be parsed succesfully" $
       isJust parsedTelegram `shouldBe` True
 
-    let getField fieldAccessor = headMay (parsedTelegram ^.. _Just . dsmrFields . traverse . fieldAccessor)
-
     it "parsed telegram contains expected version header" $
-      getField versionNumber `shouldBe` Just (42 :: Integer)
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . versionNumber) `shouldBe` Just (42 :: Integer)
 
     it "parsed telegram contains expected timestamp" $
-      getField timeStamp `shouldBe` Just (mkUTCTime (2020, 5, 29) (18, 33, 19) )
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . timeStamp) `shouldBe` Just (mkUTCTime (2020, 5, 29) (18, 33, 19))
 
     it "parsed telegram contains expected EquipmentID" $
-      getField equipmentID `shouldBe` (Just "4530303034303031353934373534343134")
+       (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . equipmentID)  `shouldBe` (Just "4530303034303031353934373534343134")
 
     it "parsed telegram contains expected EnergyConsumedTariff1" $
-      getField energyConsumedTariff1 `shouldBe` (Just 014765.683)
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . energyConsumedTariff1) `shouldBe` (Just 014765.683)
 
     it "parsed telegram contains expected EnergyConsumedTariff2" $
-      getField energyConsumedTariff2 `shouldBe` (Just 0)
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . energyConsumedTariff2) `shouldBe` (Just 0)
 
     it "parsed telegram contains expected EnergyReturnedTariff1" $
-      getField energyReturnedTariff1 `shouldBe` (Just 014628.043)
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . energyReturnedTariff1) `shouldBe` (Just 014628.043)
 
     it "parsed telegram contains expected EnergyReturnedTariff2" $
-      getField energyReturnedTariff2 `shouldBe` (Just 0)
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . energyReturnedTariff2) `shouldBe` (Just 0)
 
     it "parsed telegram contains expected ActualTariffIndicator" $
-      getField actualTariffIndicator `shouldBe` (Just 2)
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . actualTariffIndicator) `shouldBe` (Just 2)
 
     it "parsed telegram contains expected ActualPowerConsumption" $
-      getField actualPowerConsumption `shouldBe` (Just 03.877)
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . actualPowerConsumption) `shouldBe` (Just 03.877)
 
     it "parsed telegram contains expected ActualPowerReturned" $
-      getField actualPowerReturned `shouldBe` (Just 0)
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . actualPowerReturned) `shouldBe` (Just (0 :: Double))
     
     it "parsed telegram contains expected NumberOfPowerFailures" $
-      getField numberOfLongPowerFailures `shouldBe` (Just 2)
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . numberOfPowerFailures) `shouldBe` (Just 3)
 
-{-
+    it "parsed telegram contains expected numberOfLongPowerFailures" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . numberOfLongPowerFailures) `shouldBe` (Just 2)
 
-NumberOfPowerFailures         numberOfPowerFailures          
-NumberOfLongPowerFailures     numberOfLongPowerFailures      
-PowerFailureLog               powerFailureLog                
-NumberOfVoltageSagsPhaseL1    numberOfVoltageSagsPhaseL1     
-NumberOfVoltageSagsPhaseL2    numberOfVoltageSagsPhaseL2     
-ActualCurrentConsumption      actualCurrentConsumption       
-ActualPowerConsumptionPhaseL1 actualPowerConsumptionPhaseL1  
-ActualPowerReturnedPhaseL1    actualPowerReturnedPhaseL1     
-SlaveGasMeterDeviceType       slaveGasMeterDeviceType        
-GasMeterSerialNumber          gasMeterSerialNumber           
-GasConsumption                gasConsumption                        
--}
-    it "returns the first element of an *arbitrary* list" $
-      property $ \x xs -> head (x:xs) == (x :: Int)
+    it "parsed telegram contains expected powerFailureLog" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . powerFailureLog) `shouldBe` Just [(mkUTCTime (2017, 3, 26) (08, 25, 19), 0029642045),(mkUTCTime (2016, 4, 17) (06, 31, 31), 0032998738)]
 
-    it "throws an exception if used with an empty list" $ do
-      evaluate (head []) `shouldThrow` anyException
+    it "parsed telegram contains expected numberOfVoltageSagsPhaseL1" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . numberOfVoltageSagsPhaseL1) `shouldBe` (Just 0)
 
-containsField :: DsmrTelegram -> DsmrField -> Bool
-containsField (DsmrTelegram _ fields _) field = field `elem` fields
+    it "parsed telegram contains expected numberOfVoltageSagsPhaseL2" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . numberOfVoltageSagsPhaseL2) `shouldBe` (Just 0)
 
-getVersion :: DsmrTelegram -> Maybe DsmrField
-getVersion (DsmrTelegram _ fields _) = 
-  let isVersion (VersionNumber _) = True
-      isVersion _ = False
-      versionFields = filter isVersion fields
-  in 
-    case (length versionFields==1) of
-      True -> Just $ head versionFields
-      False -> Nothing
+    it "parsed telegram contains expected actualCurrentConsumption" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . actualCurrentConsumption) `shouldBe` (Just 17)
+
+    it "parsed telegram contains expected actualPowerConsumptionPhaseL1" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . actualPowerConsumptionPhaseL1) `shouldBe` (Just 03.877)
+
+    it "parsed telegram contains expected actualPowerReturnedPhaseL1" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . actualPowerReturnedPhaseL1) `shouldBe` (Just 0)
+
+    it "parsed telegram contains expected slaveGasMeterDeviceType" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . slaveGasMeterDeviceType) `shouldBe` (Just 3)
+
+    it "parsed telegram contains expected gasMeterSerialNumber" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . gasMeterSerialNumber) `shouldBe` (Just "4730303137353931323139313130333134")
+
+    it "parsed telegram contains expected gasConsumption" $
+      (headMay $ parsedTelegram  ^.. _Just . dsmrFields . traverse . gasConsumption) `shouldBe` (Just (mkUTCTime (2020, 5, 29) (18, 00, 00), 05277.053))
 
