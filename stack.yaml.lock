@@ -33,13 +33,6 @@ packages:
   original:
     hackage: warp-3.3.12@sha256:58f2e932be63c89db71a596c43d1ad5f98d8599bd0fb7a7082047f223f49df01,10798
 - completed:
-    hackage: polysemy-webserver-0.1.0.0@sha256:008497bd1c79403a6b64f71ccf0627d10762a9dd1798da055c932a53dc665a2e,1775
-    pantry-tree:
-      size: 329
-      sha256: 56dcc59d06952e818f7459f666f9972db107e77ff36b4d5c264c4ca4b865754c
-  original:
-    hackage: polysemy-webserver-0.1.0.0@sha256:008497bd1c79403a6b64f71ccf0627d10762a9dd1798da055c932a53dc665a2e,1775
-- completed:
     hackage: polysemy-plugin-0.2.5.0@sha256:67e30be568a141b852aace1a60e180cb5060fbb2835365a81a3ea779536d6d35,2952
     pantry-tree:
       size: 1232

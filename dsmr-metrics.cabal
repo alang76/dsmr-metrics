@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 23337fc12478c06ac1787f7934085aa5b15efed1aa352833088f0a06c0de1c4e
+-- hash: 3d188ba785f256530bd0d08e05d71e49992d640305a56e2dc5c74cf84eb59494
 
 name:           dsmr-metrics
 version:        0.1.0.0
@@ -27,11 +27,10 @@ source-repository head
 
 library
   exposed-modules:
-      AsyncEffect
       DsmrMetricsReader
       DsmrMetricsReader.Internal
+      Effects.AsyncEffect
       Lib
-      PolyWeb
       PrometheusMetricsServer
   other-modules:
       Paths_dsmr_metrics

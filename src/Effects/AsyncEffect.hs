@@ -10,7 +10,7 @@
 
 
 
-module AsyncEffect
+module Effects.AsyncEffect
   ( -- * Effect
     Async (..)
 
