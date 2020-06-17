@@ -32,6 +32,34 @@ packages:
       sha256: 0a187a7a99d0639526cbc9a1f6c900593d2b6e993a32ecfdc3a9d7c8bae7228a
   original:
     hackage: warp-3.3.12@sha256:58f2e932be63c89db71a596c43d1ad5f98d8599bd0fb7a7082047f223f49df01,10798
+- completed:
+    hackage: polysemy-webserver-0.1.0.0@sha256:008497bd1c79403a6b64f71ccf0627d10762a9dd1798da055c932a53dc665a2e,1775
+    pantry-tree:
+      size: 329
+      sha256: 56dcc59d06952e818f7459f666f9972db107e77ff36b4d5c264c4ca4b865754c
+  original:
+    hackage: polysemy-webserver-0.1.0.0@sha256:008497bd1c79403a6b64f71ccf0627d10762a9dd1798da055c932a53dc665a2e,1775
+- completed:
+    hackage: polysemy-plugin-0.2.5.0@sha256:67e30be568a141b852aace1a60e180cb5060fbb2835365a81a3ea779536d6d35,2952
+    pantry-tree:
+      size: 1232
+      sha256: 5c90dac2eba48b4e337b302347c233ecaedb63e333641e094e718a548ac86711
+  original:
+    hackage: polysemy-plugin-0.2.5.0@sha256:67e30be568a141b852aace1a60e180cb5060fbb2835365a81a3ea779536d6d35,2952
+- completed:
+    hackage: ghc-tcplugins-extra-0.3.2@sha256:1bbfd4449c3669a31618ea0ebc5d00d980a53988daad3b6218bab5c8cdff268d,1687
+    pantry-tree:
+      size: 331
+      sha256: 4b16989344380c912e476dc232cc58264837b498e31a8bf16a17092ba6c1cfb9
+  original:
+    hackage: ghc-tcplugins-extra-0.3.2@sha256:1bbfd4449c3669a31618ea0ebc5d00d980a53988daad3b6218bab5c8cdff268d,1687
+- completed:
+    hackage: polysemy-1.3.0.0@sha256:fa76e96a883fd1c4bdbad792a0a9d88f59f84817651aea5c71d9b4f74e42c5b6,6141
+    pantry-tree:
+      size: 4309
+      sha256: 3d2fb15ddda9053f6bfd4b0810a79a9542505acb5e7e528856ec3cd86d6df066
+  original:
+    hackage: polysemy-1.3.0.0@sha256:fa76e96a883fd1c4bdbad792a0a9d88f59f84817651aea5c71d9b4f74e42c5b6,6141
 snapshots:
 - completed:
     size: 496111

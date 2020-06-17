@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fa839c409cc32f316c4e6530762d3fb85041b892a8e54ef15e66bcf1f64c8a9d
+-- hash: 23337fc12478c06ac1787f7934085aa5b15efed1aa352833088f0a06c0de1c4e
 
 name:           dsmr-metrics
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/dsmr-metrics#readme>
 homepage:       https://github.com/githubuser/dsmr-metrics#readme
 bug-reports:    https://github.com/githubuser/dsmr-metrics/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2020 Author name here
+author:         Arjen Langebaerd
+maintainer:     arjen@langebaerd.net
+copyright:      2020 AArjen Langebaerd
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -27,9 +27,11 @@ source-repository head
 
 library
   exposed-modules:
+      AsyncEffect
       DsmrMetricsReader
       DsmrMetricsReader.Internal
       Lib
+      PolyWeb
       PrometheusMetricsServer
   other-modules:
       Paths_dsmr_metrics
@@ -42,6 +44,8 @@ library
     , http-types >=0.12.3 && <0.13
     , lens >=4.18.1 && <4.19
     , megaparsec >=8.0.0 && <8.1
+    , polysemy >=1.3.0.0 && <1.4
+    , polysemy-plugin >=0.2.5.0 && <0.3
     , prometheus-client >=1.0.0.1 && <1.1
     , prometheus-metrics-ghc >=1.0.1 && <1.1
     , safe >=0.3.19 && <0.4
@@ -57,7 +61,7 @@ executable dsmr-metrics-exe
       Paths_dsmr_metrics
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fplugin=Polysemy.Plugin
   build-depends:
       async >=2.2.2 && <2.3
     , base >=4.13 && <4.14
@@ -66,6 +70,8 @@ executable dsmr-metrics-exe
     , http-types >=0.12.3 && <0.13
     , lens >=4.18.1 && <4.19
     , megaparsec >=8.0.0 && <8.1
+    , polysemy >=1.3.0.0 && <1.4
+    , polysemy-plugin >=0.2.5.0 && <0.3
     , prometheus-client >=1.0.0.1 && <1.1
     , prometheus-metrics-ghc >=1.0.1 && <1.1
     , safe >=0.3.19 && <0.4
@@ -82,7 +88,7 @@ test-suite dsmr-metrics-test
       Paths_dsmr_metrics
   hs-source-dirs:
       test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fplugin=Polysemy.Plugin
   build-depends:
       QuickCheck >=2.13.2 && <2.14
     , async >=2.2.2 && <2.3
@@ -93,6 +99,8 @@ test-suite dsmr-metrics-test
     , http-types >=0.12.3 && <0.13
     , lens >=4.18.1 && <4.19
     , megaparsec >=8.0.0 && <8.1
+    , polysemy >=1.3.0.0 && <1.4
+    , polysemy-plugin >=0.2.5.0 && <0.3
     , prometheus-client >=1.0.0.1 && <1.1
     , prometheus-metrics-ghc >=1.0.1 && <1.1
     , safe >=0.3.19 && <0.4

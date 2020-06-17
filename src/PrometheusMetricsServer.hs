@@ -16,6 +16,8 @@ import qualified Network.Wai.Middleware.Prometheus as P
 import qualified Prometheus as P
 import qualified Prometheus.Metric.GHC as P
 
+import PolyWeb
+
 incCounter :: P.Counter -> IO ()
 incCounter ctr = P.incCounter ctr 
 
@@ -26,6 +28,8 @@ pageVisits = P.unsafeRegister
            -- gives the name of the metric and a help string that describes the
            -- value that the metric represents.
            $ P.Info "page_visits" "The number of visits to the index page."
+
+
 
 runMetricsServer :: IO ()
 runMetricsServer = do
