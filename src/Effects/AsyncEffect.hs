@@ -1,14 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE TypeFamilies #-}
+-- Taken from Polysemy.Async, then added the AwaitAny and Cancel constructors
 
 module Effects.AsyncEffect
   ( -- * Effect
@@ -26,14 +16,11 @@ module Effects.AsyncEffect
     -- * Interpretations
   , asyncToIO
   , asyncToIOFinal
-  , lowerAsync
   ) where
 
 import qualified Control.Concurrent.Async as A
 import           Polysemy
 import           Polysemy.Final
-
-
 
 ------------------------------------------------------------------------------
 -- | An effect for spawning asynchronous computations.
@@ -130,27 +117,3 @@ asyncToIOFinal = interpretFinal $ \case
   Cancel a -> liftS (A.cancel a)
 
 {-# INLINE asyncToIOFinal #-}
-
-------------------------------------------------------------------------------
--- | Run an 'Async' effect in terms of 'A.async'.
---
--- @since 1.0.0.0
-lowerAsync
-    :: Member (Embed IO) r
-    => (forall x. Sem r x -> IO x)
-       -- ^ Strategy for lowering a 'Sem' action down to 'IO'. This is likely
-       -- some combination of 'runM' and other interpreters composed via '.@'.
-    -> Sem (Async ': r) a
-    -> Sem r a
-lowerAsync lower m = interpretH
-    ( \case
-        Async a -> do
-          ma  <- runT a
-          ins <- getInspectorT
-          fa  <- embed $ A.async $ lower $ lowerAsync lower ma
-          pureT $ fmap (inspect ins) fa
-
-        Await a -> pureT =<< embed (A.wait a)
-    )  m
-{-# INLINE lowerAsync #-}
-{-# DEPRECATED lowerAsync "Use 'asyncToIOFinal' instead" #-}

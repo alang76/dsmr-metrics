@@ -1,6 +1,7 @@
 module DsmrMetricsReader
-    ( readMetrics,
-      DsmrTelegram (..), DsmrField (..)
+    ( DsmrTelegram (..), 
+      DsmrField (..), 
+      readMetrics
     ) where
 
 import DsmrMetricsReader.Internal
