@@ -1,16 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE TypeFamilies #-}
-
-
 module Effects.DsmrTelegramReader (
     DsmrTelegramReader(..),
     readTelegram,
@@ -21,8 +8,6 @@ module Effects.DsmrTelegramReader (
 
 import Control.Concurrent (threadDelay)
 import Polysemy as P
-
-import Debug.Trace (trace) -- DEBUG ONLY!! TODO: REMOVE
 
 data DsmrTelegramReader m a where
   ReadTelegram :: DsmrTelegramReader m String
@@ -35,19 +20,20 @@ readSerial = undefined
 runTelegramReaderSerial :: P.Member (P.Embed IO) r => P.Sem (DsmrTelegramReader ': r) String -> P.Sem r String
 runTelegramReaderSerial = P.interpret $ \case ReadTelegram -> P.embed readSerial
 
---runWebServerIO  :: P.Member (P.Embed IO) r => P.Sem (MetricsWebServer ': r) a -> P.Sem r a
---runWebServerIO = P.interpret $ \case (RunServer port app) -> P.embed $ W.run port app
 
+-- TODO: remove when real implementation is working
 runTelegramReaderFakeIO :: P.Member (P.Embed IO) r => P.Sem (DsmrTelegramReader ': r) a -> P.Sem r a
-runTelegramReaderFakeIO = trace "running reader fake IO" $ P.interpret $ \case 
+runTelegramReaderFakeIO = P.interpret $ \case 
   ReadTelegram ->  P.embed $ do
     threadDelay 5000000
     pure telegram
 
+-- TODO: move to test suite when real implementation is working
 runTelegramReaderFakePure :: P.Sem (DsmrTelegramReader ': r) a  -> P.Sem r a
 runTelegramReaderFakePure = P.interpret $ \case
   ReadTelegram -> return telegram
 
+  -- TODO: move to test suite when real implementation is working
 telegram :: String
 telegram = 
     "/XMX5LGBBFFB231215493\n\

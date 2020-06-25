@@ -30,8 +30,6 @@ import Data.Text (Text, pack)
 import Polysemy as P
 import Polysemy.Output as P
 
-import Debug.Trace (trace) -- DEBUG ONLY!! TODO: REMOVE
-
 metricVectorGasConsumption :: PM.Vector Text PM.Gauge
 metricVectorGasConsumption = 
                PM.unsafeRegister
@@ -74,7 +72,7 @@ runUpdatePrometheusMetricsIO =
             ioAction
             pure ()
     in
-        P.interpret $ trace "adding metric" $ \case
+        P.interpret $ \case
             UpdateEnergyConsumedTariff1 energyConsumedTariff1_-> interpretSetGauge (metricGauge "energyConsumedTariff1" "The energy consumed while tariff 1 was active in kWh") energyConsumedTariff1_
             UpdateEnergyConsumedTariff2 energyConsumedTariff2_ -> interpretSetGauge (metricGauge "energyConsumedTariff2" "The energy consumed while tariff 2 was active in kWh") energyConsumedTariff2_
             UpdateEnergyReturnedTariff1 energyReturnedTariff1_ -> interpretSetGauge (metricGauge "energyReturnedTariff1" "The energy returned while tariff 1 was active in kWh") energyReturnedTariff1_
@@ -85,7 +83,7 @@ runUpdatePrometheusMetricsIO =
             UpdateNumberOfPowerFailures updateNumberOfPowerFailures_ -> interpretSetGauge (metricGauge "updateNumberOfPowerFailures" "The number of power failures") (fromIntegral updateNumberOfPowerFailures_)
             UpdateNumberOfPowerLongFailures updateNumberOfPowerLongFailures_ -> interpretSetGauge (metricGauge "updateNumberOfPowerLongFailures" "The number of long power failures" ) (fromIntegral updateNumberOfPowerLongFailures_)
             UpdateActualCurrentConsumption updateActualCurrentConsumption_ -> interpretSetGauge (metricGauge "updateActualCurrentConsumption" "The actual current consumtion in A") (fromIntegral updateActualCurrentConsumption_)
-            UpdateGasConsumption updateGasConsumptionTimeStamp updateGasConsumptionVolume -> interpretSetVector metricVectorGasConsumption (pack . show $ updateGasConsumptionTimeStamp) (\gauge -> PM.setGauge gauge updateGasConsumptionVolume)
+            UpdateGasConsumption updateGasConsumptionTimeStamp updateGasConsumptionVolume -> interpretSetVector metricVectorGasConsumption (pack . show $ updateGasConsumptionTimeStamp) (`PM.setGauge` updateGasConsumptionVolume)
             UpdateNothing -> pure ()
 
 data MetricsWebServer m a where
@@ -99,33 +97,14 @@ runWebServerIO = P.interpret $ \case
         _ <- PM.register PM.ghcMetrics
         W.run port app
 
---data MetricsRegistry m a where
---    Register :: P.Metric s -> MetricsRegistry m ()
-
---makeSem ''MetricsRegistry
-
---registerPrometheus :: (MonadIO m, Member (Embed m) r) => Sem (MetricsRegistry ': r) a -> Sem r a
---registerPrometheus = interpret $ \case (Register metric) -> fixit $ P.register metric
-
-
 runMetricsServer :: Members '[MetricsWebServer, Output String] r => Sem r ()
 runMetricsServer = do
     let port = 3000
     output $ "Listening at http://localhost:" ++ show port ++ "/"
     -- Register the GHC runtime metrics. For these to work, the app must be run
     -- with the `+RTS -T` command line options.
- --   
+
     -- Instrument the app with the prometheus middlware using the default
     -- `PrometheusSettings`. This will cause the app to dump the metrics when
     -- the /metrics endpoint is accessed.
     runServer port (PM.prometheus PM.def PM.metricsApp)
-
-{-
-runPrometheusMetricsServer :: IO ()
-runPrometheusMetricsServer = do
-    runMetricsServer & runWebServerIO
-                     & runOutputSem (embed . putStrLn)
-                     & runM
-                               -- & registerPrometheus
-
--}

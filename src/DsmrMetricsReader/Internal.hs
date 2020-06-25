@@ -16,9 +16,6 @@ import Effects.DsmrTelegramReader (DsmrTelegramReader(..), readTelegram)
 import qualified Polysemy as P
 import qualified Polysemy.Output as P
 
-import Debug.Trace (trace) -- DEBUG ONLY!! TODO: REMOVE
-
-
 -- telegram parser
 type Parser = Parsec Void String
 data DsmrTelegram = DsmrTelegram {
@@ -138,8 +135,6 @@ valueParensParserP valParser = do
   val <- valParser
   _ <- char ')'
   return val
-
-
 
 -- "/XMX5LGBBFFB231215493\n\
 -- \1-3:0.2.8(42)\n\
@@ -264,21 +259,12 @@ runDsmrParser input = do
             return Nothing
           Right dsmrTelegram -> return $ Just dsmrTelegram
 
-{-
-
-type family (++) (as :: [k]) (bs :: [k]) :: [k] where
-  (++) a '[] = a
-  (++) '[] b = b
-  (++) (a ': as) bs = a ': (as ++ bs)
--}
-
 readMetrics :: (P.Members '[DsmrTelegramReader, P.Output String] r) => (DsmrTelegram -> P.Sem r ()) -> P.Sem r ()
-readMetrics callback = trace "readMetrics called.." $
+readMetrics callback =
     do
-        --let newTelegram = DsmrTelegram "FakeMeterID" [Energy 0] 666
-        telegram <- trace "reading telegram.." $ readTelegram
-        parseResult <- trace "parsing" $ runDsmrParser telegram
+        telegram <- readTelegram
+        parseResult <- runDsmrParser telegram
         case parseResult of
-          Just dsmrTelegram -> trace "parse success.." $ callback dsmrTelegram
-          Nothing -> trace "parse failed.." $ pure ()
-        trace "recursive call" $ readMetrics callback
+          Just dsmrTelegram -> callback dsmrTelegram
+          Nothing -> pure ()
+        readMetrics callback
