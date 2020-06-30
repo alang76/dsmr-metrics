@@ -85,4 +85,4 @@ tests:
     - dsmr-metrics
     - hspec >=2.7.1 && < 2.8
     - QuickCheck >= 2.13.2 && <2.14
-
+    - deepseq >= 1.4.4.0 && < 1.5

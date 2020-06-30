@@ -25,7 +25,7 @@ runTelegramReaderSerial = P.interpret $ \case ReadTelegram -> P.embed readSerial
 runTelegramReaderFakeIO :: P.Member (P.Embed IO) r => P.Sem (DsmrTelegramReader ': r) a -> P.Sem r a
 runTelegramReaderFakeIO = P.interpret $ \case 
   ReadTelegram ->  P.embed $ do
-    threadDelay 5000000
+    threadDelay 1
     pure telegram
 
 -- TODO: move to test suite when real implementation is working

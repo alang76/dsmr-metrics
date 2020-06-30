@@ -1,6 +1,7 @@
 module Main where
 
 import Data.Function ((&))
+import Control.Monad (forever)
 import qualified Effects.AsyncEffect as AE
 import qualified Effects.DsmrTelegramReader as DTR
 import qualified Polysemy as P
@@ -27,8 +28,9 @@ import PrometheusMetricsServer (
     updateNothing
     )
 
-processCallbackUpdatePrometheusMetrics :: P.Member UpdatePrometheusMetric r => DsmrTelegram -> P.Sem r ()
-processCallbackUpdatePrometheusMetrics (DsmrTelegram _ fields _) = mapM_ fieldToMetric fields
+processCallbackUpdatePrometheusMetrics :: P.Member UpdatePrometheusMetric r => Maybe DsmrTelegram -> P.Sem r ()
+processCallbackUpdatePrometheusMetrics Nothing = pure ()
+processCallbackUpdatePrometheusMetrics (Just (DsmrTelegram _ fields _)) = mapM_ fieldToMetric fields
     where
       fieldToMetric ::  P.Member UpdatePrometheusMetric r => DsmrField -> P.Sem r ()
       fieldToMetric (VersionNumber _)                                                 = updateNothing
@@ -58,13 +60,12 @@ runApp = do
   P.output "Starting metrics serving thread"
   metricsThread <- AE.async runMetricsServer
   P.output "Starting DSMR reading thread"
-  readDsmrThread <- AE.async $ readMetrics processCallbackUpdatePrometheusMetrics
+  readDsmrThread <- AE.async . forever $ readMetrics processCallbackUpdatePrometheusMetrics
   (_, runCoreResult) <- AE.awaitAny [metricsThread, readDsmrThread]
-  P.output "Program terminated."
-  P.output ("Core result: " ++ show runCoreResult)
+  P.output $ "Program terminated, core result = " ++ show runCoreResult
 -- kill all threads when one of the main threads ended
   AE.cancel metricsThread
-  --AE.cancel readDsmrThread
+  AE.cancel readDsmrThread
 
 main :: IO ()
 main =

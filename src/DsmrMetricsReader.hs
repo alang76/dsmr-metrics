@@ -5,3 +5,4 @@ module DsmrMetricsReader
     ) where
 
 import DsmrMetricsReader.Internal
+import DsmrMetricsReader.Model
