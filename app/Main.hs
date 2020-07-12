@@ -28,6 +28,8 @@ import PrometheusMetricsServer (
     updateNothing
     )
 
+import Effects.Env(Env, runEnvIO)
+
 processCallbackUpdatePrometheusMetrics :: P.Member UpdatePrometheusMetric r => Maybe DsmrTelegram -> P.Sem r ()
 processCallbackUpdatePrometheusMetrics Nothing = pure ()
 processCallbackUpdatePrometheusMetrics (Just (DsmrTelegram _ fields _)) = mapM_ fieldToMetric fields
@@ -55,7 +57,7 @@ processCallbackUpdatePrometheusMetrics (Just (DsmrTelegram _ fields _)) = mapM_ 
       fieldToMetric (GasMeterSerialNumber _)                                          = updateNothing
       fieldToMetric (GasConsumption (gasConsumptionTimeStamp,gasConsumptionVolume))   = updateGasConsumption gasConsumptionTimeStamp gasConsumptionVolume
 
-runApp :: P.Members '[AE.Async, MetricsWebServer, P.Output String, DTR.DsmrTelegramReader, UpdatePrometheusMetric] r => P.Sem r ()
+runApp :: P.Members '[AE.Async, MetricsWebServer, P.Output String, DTR.DsmrTelegramReader, UpdatePrometheusMetric, Env] r => P.Sem r ()
 runApp = do
   P.output "Starting metrics serving thread"
   metricsThread <- AE.async runMetricsServer
@@ -70,6 +72,7 @@ runApp = do
 main :: IO ()
 main =
   runApp
+    & runEnvIO
     & runWebServerIO
     & P.runOutputSem (P.embed . putStrLn)
     & DTR.runTelegramReaderFakeIO
