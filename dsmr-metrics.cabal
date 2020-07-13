@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e5f64b42ac76056a5461f3f8b61f73ab4d025b7a55adcbd6b329b59a4b11c793
+-- hash: a7abfcb6075499a9d563f9d2b25ce98d47d87c42dc5bc2f85f9335790aec8cdb
 
 name:           dsmr-metrics
 version:        0.1.0.0
@@ -96,6 +96,7 @@ test-suite dsmr-metrics-test
       ReadMetricsSpec
       SampleInput
       TelegramBuilder
+      TimeSpec
       Paths_dsmr_metrics
   hs-source-dirs:
       test
@@ -110,7 +111,6 @@ test-suite dsmr-metrics-test
     , dsmr-metrics
     , hedgehog >=1.0.2 && <1.1.0
     , hspec >=2.7.1 && <2.8
-    , hspec-hedgehog >=0.0.1.2 && <0.1.0.0
     , http-types >=0.12.3 && <0.13
     , lens >=4.18.1 && <4.19
     , megaparsec >=8.0.0 && <8.1

@@ -7,7 +7,8 @@ module TelegramBuilder (
   ) where
 
 import DsmrMetricsReader.Model
-import Data.Time.Clock (UTCTime(..))
+import Data.Time.Clock(UTCTime(..))
+import Data.Maybe(fromJust)
 import Effects.Env
 import Util.Time(utcToLocalTimeStamp, localTimeStampToUTC, mkUTCTime)
 
@@ -19,10 +20,10 @@ createTestTelegram = do
   timeZone <- getEnvironmentTimeZone
   century <- getEnvironmentTimeCentury
   let
-    timeStampUtc = localTimeStampToUTC "200529163319S" timeZone century
-    log1TimeUtc = localTimeStampToUTC "170326062519S" timeZone century
-    log2TimeUtc = localTimeStampToUTC "160417043131S" timeZone century
-    gasTimeUtc = localTimeStampToUTC "200529160000S" timeZone century
+    timeStampUtc = fromJust $ localTimeStampToUTC timeZone century "200529163319S"
+    log1TimeUtc = fromJust $ localTimeStampToUTC timeZone century "170326062519S"
+    log2TimeUtc = fromJust $ localTimeStampToUTC timeZone century "160417043131S"
+    gasTimeUtc = fromJust $ localTimeStampToUTC timeZone century "200529160000S"
   pure $ buildTelegram  
       "XMX5LGBBFFB231215493"                              -- meter ID
       42                                                  -- version ID
@@ -148,11 +149,11 @@ serializeField field = do
       return $ show (length _log) ++ ")" ++ "(0-0:96.7.19)" ++ logEntries
     showLogEntry :: (UTCTime, Integer) -> P.Sem r String
     showLogEntry (entryTimeStamp, entryDuration) = do
-      let timeStampStr = utcToLocalTimeStamp entryTimeStamp timeZone
+      let timeStampStr = utcToLocalTimeStamp timeZone entryTimeStamp
       return $ "(" ++ timeStampStr ++ ")(" ++ show entryDuration ++ "*s)"
   case field of
     VersionNumber                 _versionNumber ->                 pure $ "1-3:0.2.8("   ++ show _versionNumber ++ ")\n"
-    TimeStamp                     _timeStamp ->                     pure $ "0-0:1.0.0("   ++ utcToLocalTimeStamp _timeStamp timeZone ++ ")\n"
+    TimeStamp                     _timeStamp ->                     pure $ "0-0:1.0.0("   ++ utcToLocalTimeStamp timeZone _timeStamp ++ ")\n"
     EquipmentID                   _equipmentID ->                   pure $ "0-0:96.1.1("  ++ _equipmentID ++ ")\n"
     EnergyConsumedTariff1         _energyConsumedTariff1 ->         pure $ "1-0:1.8.1("   ++ show _energyConsumedTariff1 ++ "*kWh)\n"
     EnergyConsumedTariff2         _energyConsumedTariff2 ->         pure $ "1-0:2.8.1("   ++ show _energyConsumedTariff2 ++ "*kWh)\n"
@@ -173,4 +174,4 @@ serializeField field = do
     ActualPowerReturnedPhaseL1    _actualPowerReturnedPhaseL1 ->    pure $ "1-0:22.7.0("  ++ show _actualPowerReturnedPhaseL1 ++ "*kW)\n"
     SlaveGasMeterDeviceType       _slaveGasMeterDeviceType ->       pure $ "0-1:24.1.0("  ++ show _slaveGasMeterDeviceType ++ ")\n"
     GasMeterSerialNumber          _gasMeterSerialNumber ->          pure $ "0-1:96.1.0("  ++ _gasMeterSerialNumber ++ ")\n"
-    GasConsumption                (timeStampConsumption, volumeConsumption) -> pure $ "0-1:24.2.1("  ++ utcToLocalTimeStamp timeStampConsumption timeZone ++ ")(" ++ show volumeConsumption ++ "*m3)\n"
+    GasConsumption                (timeStampConsumption, volumeConsumption) -> pure $ "0-1:24.2.1("  ++ utcToLocalTimeStamp timeZone timeStampConsumption ++ ")(" ++ show volumeConsumption ++ "*m3)\n"

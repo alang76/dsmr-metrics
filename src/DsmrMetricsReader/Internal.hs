@@ -1,11 +1,11 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 
- module DsmrMetricsReader.Internal where
+module DsmrMetricsReader.Internal where
 
 import Prelude hiding (min)
 
 import Data.Void (Void)
-import Data.Maybe (catMaybes)
+import Data.Maybe (catMaybes, fromJust)
 import Data.Function ((&))
 import Data.Time (UTCTime(UTCTime), TimeOfDay(TimeOfDay), fromGregorian, timeOfDayToTime)
 import Text.Megaparsec (MonadParsec, Parsec, parse, errorBundlePretty, some, many, count, optional)
@@ -33,7 +33,7 @@ dsmrTelegramParserP = do
   fieldsParser <- dsmrFieldsParserP
   return $ do
       _ <- char '/'
-      meterID_ <- many (upperChar <|> digitChar)
+      meterID_ <- many $ alphaNumChar --upperChar <|> digitChar
       _ <- eol
       _ <- optional eol
       fields <- fieldsParser
@@ -220,8 +220,7 @@ valueTimestampParserP = do
   century <- getEnvironmentTimeCentury
   return $ do
     timeStr <- (++) <$> count 12 digitChar <*> (string "S" <|> string "W")
-    res <- pure $ localTimeStampToUTC timeStr timeZone century
-    return $  trace ("timestamp = " ++ timeStr ++", result = " ++ show res) $ res
+    return $ fromJust $ localTimeStampToUTC timeZone century timeStr
 
 runDsmrParser :: P.Members '[Env, P.Output String] r => String -> P.Sem r (Maybe DsmrTelegram)
 runDsmrParser input = do

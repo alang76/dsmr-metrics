@@ -21,4 +21,4 @@ runEnvIO = P.interpret $ \case
   GetEnvironmentTimeCentury -> do
     curTimeUtc <- P.embed getCurrentTime 
     let (year, _, _) = toGregorian $ utctDay curTimeUtc
-    return $ floor (fromInteger year / 100)
+    return $ floor ((fromInteger year :: Double) / 100)

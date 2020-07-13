@@ -9,24 +9,24 @@ import Data.Time.Calendar(fromGregorian)
 import Data.Fixed (Pico)
 import Data.Time.Clock(UTCTime(..))
 import Data.Time.LocalTime(TimeZone(..), ZonedTime(..), TimeOfDay(..), localTimeToUTC, utcToZonedTime, zonedTimeToLocalTime, timeOfDayToTime)
-import Data.Time.Format(parseTimeOrError, defaultTimeLocale, formatTime)
+import Data.Time.Format(parseTimeM, defaultTimeLocale, formatTime)
+import Data.Time.Calendar(fromGregorian)
 import Effects.Env
 import Polysemy as P
 
-localTimeStampToUTC :: String -> TimeZone ->  Integer ->UTCTime
-localTimeStampToUTC timeStr timeZone century = 
-    let localTime = parseTimeOrError True defaultTimeLocale "%Y%m%d%H%M%S" . (show century ++) . init $ timeStr
-    in localTimeToUTC timeZone localTime
+localTimeStampToUTC :: TimeZone ->  Integer -> String -> Maybe UTCTime
+localTimeStampToUTC timeZone century timeStr = do
+    localTime <- parseTimeM True defaultTimeLocale "%Y%m%d%H%M%S" . (show century ++) . init $ timeStr
+    return $ localTimeToUTC timeZone localTime
 
-utcToLocalTimeStamp :: UTCTime -> TimeZone -> String
-utcToLocalTimeStamp utcTime timeZone =
+utcToLocalTimeStamp :: TimeZone -> UTCTime -> String
+utcToLocalTimeStamp timeZone utcTime =
     let 
         zonedTime =  utcToZonedTime timeZone utcTime
         localTime = zonedTimeToLocalTime zonedTime
         timeZoneZoned = zonedTimeZone zonedTime
         dstPostfix = if timeZoneSummerOnly timeZoneZoned then "S" else "W"
     in formatTime defaultTimeLocale "%y%m%d%H%M%S" localTime ++ dstPostfix
-
 
 mkUTCTime :: (Integer, Int, Int)
           -> (Int, Int, Pico)

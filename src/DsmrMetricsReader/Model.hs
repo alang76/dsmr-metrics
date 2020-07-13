@@ -1,6 +1,6 @@
 module DsmrMetricsReader.Model where
 
-import Data.Time (UTCTime(UTCTime))
+import Data.Time (UTCTime)
 import Control.Lens.TH (makeLenses, makePrisms)
 
 data DsmrTelegram = DsmrTelegram {
