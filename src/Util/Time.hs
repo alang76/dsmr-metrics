@@ -13,9 +13,9 @@ import Data.Time.Format(parseTimeOrError, defaultTimeLocale, formatTime)
 import Effects.Env
 import Polysemy as P
 
-localTimeStampToUTC :: String -> TimeZone -> UTCTime
-localTimeStampToUTC timeStr timeZone = 
-    let localTime = parseTimeOrError True defaultTimeLocale "%y%m%d%H%M%S" . init $ timeStr
+localTimeStampToUTC :: String -> TimeZone ->  Integer ->UTCTime
+localTimeStampToUTC timeStr timeZone century = 
+    let localTime = parseTimeOrError True defaultTimeLocale "%Y%m%d%H%M%S" . (show century ++) . init $ timeStr
     in localTimeToUTC timeZone localTime
 
 utcToLocalTimeStamp :: UTCTime -> TimeZone -> String

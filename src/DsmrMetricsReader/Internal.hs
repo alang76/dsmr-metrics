@@ -20,7 +20,7 @@ import qualified Polysemy as P
 import qualified Polysemy.Output as P
 
 import Effects.DsmrTelegramReader (DsmrTelegramReader(..), readTelegram)
-import Effects.Env (Env(..), getEnvironmentTimeZone)
+import Effects.Env (Env(..), getEnvironmentTimeZone, getEnvironmentTimeCentury)
 import DsmrMetricsReader.Model
 import Util.Time (localTimeStampToUTC, utcToLocalTimeStamp)
 
@@ -217,9 +217,10 @@ valueStringParserP = return $ many alphaNumChar
 valueTimestampParserP :: P.Member Env r => P.Sem r (Parser UTCTime)
 valueTimestampParserP = do
   timeZone <- getEnvironmentTimeZone
+  century <- getEnvironmentTimeCentury
   return $ do
     timeStr <- (++) <$> count 12 digitChar <*> (string "S" <|> string "W")
-    res <- pure $ localTimeStampToUTC timeStr timeZone
+    res <- pure $ localTimeStampToUTC timeStr timeZone century
     return $  trace ("timestamp = " ++ timeStr ++", result = " ++ show res) $ res
 
 runDsmrParser :: P.Members '[Env, P.Output String] r => String -> P.Sem r (Maybe DsmrTelegram)

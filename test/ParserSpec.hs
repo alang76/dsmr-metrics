@@ -139,8 +139,9 @@ parseTelegram telegram =
 
 -- TODO move to a central location and remove duplication
 runEnvPureTest :: P.Sem (Env ': r) a -> P.Sem r a
-runEnvPureTest = P.interpret $ \case
+runEnvPureTest = P.interpret $ s\case
   GetEnvironmentTimeZone -> return $ TimeZone 120 True "TTZ"
+  GetEnvironmentTimeCentury -> return 20
 
 runParser :: (P.Members '[DTR.DsmrTelegramReader, P.Output String, Env] r) => P.Sem r (Maybe DsmrTelegram)
 runParser = do

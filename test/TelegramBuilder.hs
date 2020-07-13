@@ -17,12 +17,13 @@ import qualified Polysemy as P
 createTestTelegram :: P.Member Env r => P.Sem r DsmrTelegram
 createTestTelegram = do
   timeZone <- getEnvironmentTimeZone
+  century <- getEnvironmentTimeCentury
   let
-    timeStampUtc = localTimeStampToUTC "200529163319S" timeZone
-    log1TimeUtc = localTimeStampToUTC "170326062519S" timeZone
-    log2TimeUtc = localTimeStampToUTC "160417043131S" timeZone
-    gasTimeUtc = localTimeStampToUTC "200529160000S" timeZone
-  pure $ buildTelegram 
+    timeStampUtc = localTimeStampToUTC "200529163319S" timeZone century
+    log1TimeUtc = localTimeStampToUTC "170326062519S" timeZone century
+    log2TimeUtc = localTimeStampToUTC "160417043131S" timeZone century
+    gasTimeUtc = localTimeStampToUTC "200529160000S" timeZone century
+  pure $ buildTelegram  
       "XMX5LGBBFFB231215493"                              -- meter ID
       42                                                  -- version ID
       timeStampUtc                                        -- timestamp

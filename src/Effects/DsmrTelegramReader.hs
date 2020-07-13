@@ -35,7 +35,7 @@ runTelegramReaderFakePure = P.interpret $ \case
 
   -- TODO: move to test suite when real implementation is working
 telegram :: String
-telegram = 
+telegram =
     "/XMX5LGBBFFB231215493\n\
     \1-3:0.2.8(42)\n\
     \0-0:1.0.0(200529163319S)\n\
