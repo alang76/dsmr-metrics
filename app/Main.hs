@@ -72,10 +72,10 @@ runApp = do
 main :: IO ()
 main =
   runApp
-    & runEnvIO
     & runWebServerIO
     & P.runOutputSem (P.embed . putStrLn)
-    & DTR.runTelegramReaderFakeIO
+    & DTR.runTelegramReaderSerial
+    & runEnvIO
     & runUpdatePrometheusMetricsIO
     & AE.asyncToIO
     & P.runM

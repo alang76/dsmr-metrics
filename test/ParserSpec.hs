@@ -8,21 +8,21 @@ import qualified Hedgehog.Range as Range
 import Hedgehog (tripping, checkParallel, forAll, property, Gen, Property, Group(..), Range)
 import Data.Maybe (isJust)
 import Data.Function ((&))
-import Data.Time.LocalTime(TimeZone(..))
 import Data.Time.Clock(UTCTime(..), secondsToDiffTime)
-import Data.Time.Calendar(fromGregorian)
 import Control.Lens ((^..))
 import Control.Lens.Combinators (_Just)
 import Safe (headMay)
-import qualified Effects.DsmrTelegramReader as DTR
 import qualified Polysemy as P
 import qualified Polysemy.Output as P
 import DsmrMetricsReader.Model
 import DsmrMetricsReader.Internal
-import Effects.Env(Env(..))
 import Util.Time(mkUTCTime)
 import TimeSpec(genUTCTime)
 import TelegramBuilder(buildTelegram, serializeTelegram)
+import Effects.Env(Env(..))
+import Effects.DsmrTelegramReader(DsmrTelegramReader(..), readTelegram)
+import TestEffects.DsmrTelegramReader(runTelegramReaderFakePure)
+import TestEffects.Env(runEnvPureTest)
 
 maxValueInt :: Int
 maxValueInt = maxBound
@@ -131,16 +131,9 @@ parseTelegram telegram =
     & runEnvPureTest
     & P.run
 
-
--- TODO move to a central location and remove duplication
-runEnvPureTest :: P.Sem (Env ': r) a -> P.Sem r a
-runEnvPureTest = P.interpret $ \case
-  GetEnvironmentTimeZone -> return $ TimeZone 120 True "TTZ"
-  GetEnvironmentTimeCentury -> return 20
-
-runParser :: (P.Members '[DTR.DsmrTelegramReader, P.Output String, Env] r) => P.Sem r (Maybe DsmrTelegram)
+runParser :: (P.Members '[DsmrTelegramReader, P.Output String, Env] r) => P.Sem r (Maybe DsmrTelegram)
 runParser = do
-  telegram <- DTR.readTelegram
+  telegram <- readTelegram
   runDsmrParser telegram
 
 testParser :: IO ()
@@ -148,7 +141,7 @@ testParser = do
   parsedTelegram <-
       runParser
         & runEnvPureTest
-        & DTR.runTelegramReaderFakePure
+        & runTelegramReaderFakePure
         & P.runOutputSem (P.embed . putStrLn)
         & P.runM
 

@@ -1,18 +1,48 @@
-module TelegramBuilder (
-    createTestTelegram,
-    buildTelegram,
-    serializeTelegram,
-    serializeField,
-    tg2
-  ) where
+module TelegramBuilder
+  ( createTestTelegram
+  , buildTelegram
+  , serializeTelegram
+  , serializeField
+  , telegram
+  )
+where
 
 import DsmrMetricsReader.Model
 import Data.Time.Clock(UTCTime(..))
 import Data.Maybe(fromJust)
 import Effects.Env
 import Util.Time(utcToLocalTimeStamp, localTimeStampToUTC, mkUTCTime)
+import Effects.DsmrTelegramReader(DsmrTelegramReader(..))
 
 import qualified Polysemy as P
+
+telegram :: String
+telegram =
+    "/XMX5LGBBFFB231215493\n\
+    \1-3:0.2.8(42)\n\
+    \0-0:1.0.0(200529163319S)\n\
+    \0-0:96.1.1(4530303034303031353934373534343134)\n\
+    \1-0:1.8.1(014765.683*kWh)\n\
+    \1-0:2.8.1(000000.000*kWh)\n\
+    \1-0:1.8.2(014628.043*kWh)\n\
+    \1-0:2.8.2(000000.000*kWh)\n\
+    \0-0:96.14.0(0002)\n\
+    \1-0:1.7.0(03.877*kW)\n\
+    \1-0:2.7.0(00.000*kW)\n\
+    \0-0:96.7.21(00003)\n\
+    \0-0:96.7.9(00002)\n\
+    \1-0:99.97.0(2)(0-0:96.7.19)(170326062519S)(0029642045*s)(160417043131S)(0032998738*s)\n\
+    \1-0:32.32.0(00000)\n\
+    \1-0:32.36.0(00000)\n\
+    \0-0:96.13.1()\n\
+    \0-0:96.13.0()\n\
+    \1-0:31.7.0(017*A)\n\
+    \1-0:21.7.0(03.877*kW)\n\
+    \1-0:22.7.0(00.000*kW)\n\
+    \0-1:24.1.0(003)\n\
+    \0-1:96.1.0(4730303137353931323139313130333134)\n\
+    \0-1:24.2.1(200529160000S)(05277.053*m3)\n\
+    \!7667\n"
 
 
 createTestTelegram :: P.Member Env r => P.Sem r DsmrTelegram
@@ -48,39 +78,6 @@ createTestTelegram = do
       "4730303137353931323139313130333134"                -- gasMeterSerialNumber          
       (gasTimeUtc, 5277.053)                              -- gasConsumption 
       7667                                                -- checkSum 
-
-
-tg2 :: DsmrTelegram
-tg2 = 
-    DsmrTelegram
-      { _meterID = ""
-      , _dsmrFields =
-          [ VersionNumber { _versionNumber = 0 }
-          , TimeStamp { _timeStamp = mkUTCTime (1900, 01, 01) (0, 0, 0) } 
-          , EquipmentID { _equipmentID = "" }
-          , EnergyConsumedTariff1 { _energyConsumedTariff1 = 0.0 }
-          , EnergyConsumedTariff2 { _energyConsumedTariff2 = 0.0 }
-          , EnergyReturnedTariff1 { _energyReturnedTariff1 = 0.0 }
-          , EnergyReturnedTariff2 { _energyReturnedTariff2 = 0.0 }
-          , ActualTariffIndicator { _actualTariffIndicator = 0 }
-          , ActualPowerConsumption { _actualPowerConsumption = 0.0 }
-          , ActualPowerReturned { _actualPowerReturned = 0.0 }
-          , NumberOfPowerFailures { _numberOfPowerFailures = 0 }
-          , NumberOfLongPowerFailures { _numberOfLongPowerFailures = 0 }
-          , PowerFailureLog { _powerFailureLog = [] }
-          , NumberOfVoltageSagsPhaseL1 { _numberOfVoltageSagsPhaseL1 = 0 }
-          , NumberOfVoltageSagsPhaseL2 { _numberOfVoltageSagsPhaseL2 = 0 }
-          , ActualCurrentConsumption { _actualCurrentConsumption = 0 }
-          , ActualPowerConsumptionPhaseL1
-              { _actualPowerConsumptionPhaseL1 = 0.0 }
-          , ActualPowerReturnedPhaseL1 { _actualPowerReturnedPhaseL1 = 0.0 }
-          , SlaveGasMeterDeviceType { _slaveGasMeterDeviceType = 0 }
-          , GasMeterSerialNumber { _gasMeterSerialNumber = "" }
-          , GasConsumption
-              { _gasConsumption = ( mkUTCTime (1900, 01, 01) (0, 0, 0) , 0.0 ) }
-          ]
-      , _checkSum = 0
-      }
 
 buildTelegram :: MeterID -> Integer -> UTCTime -> String -> Double -> Double -> Double -> Double ->
                  Int -> Double -> Double -> Integer -> Integer -> [(UTCTime, Integer)] -> Integer -> Integer -> Integer ->

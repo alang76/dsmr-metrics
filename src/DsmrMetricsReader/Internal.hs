@@ -6,25 +6,19 @@ import Prelude hiding (min)
 
 import Data.Void (Void)
 import Data.Maybe (catMaybes, fromJust)
-import Data.Function ((&))
-import Data.Time (UTCTime(UTCTime), TimeOfDay(TimeOfDay), fromGregorian, timeOfDayToTime)
-import Text.Megaparsec (MonadParsec, Parsec, parse, errorBundlePretty, some, many, count, optional)
-import Text.Megaparsec.Char (char, digitChar, string, upperChar, eol, alphaNumChar)
+import Data.Time (UTCTime)
+import Text.Megaparsec (Parsec, parse, errorBundlePretty, some, many, count, optional)
+import Text.Megaparsec.Char (char, digitChar, string, eol, alphaNumChar)
 import Text.Megaparsec.Char.Lexer (float, decimal)
-import Text.Megaparsec.Error(ParseErrorBundle)
-import Text.Megaparsec.Stream (Token)
 import Control.Applicative ((<|>))
 import Control.Monad (replicateM)
-import Control.Lens.TH (makeLenses, makePrisms)
 import qualified Polysemy as P
 import qualified Polysemy.Output as P
 
 import Effects.DsmrTelegramReader (DsmrTelegramReader(..), readTelegram)
 import Effects.Env (Env(..), getEnvironmentTimeZone, getEnvironmentTimeCentury)
 import DsmrMetricsReader.Model
-import Util.Time (localTimeStampToUTC, utcToLocalTimeStamp)
-
-import Debug.Trace
+import Util.Time (localTimeStampToUTC)
 
 type Parser = Parsec Void String
 

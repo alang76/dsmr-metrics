@@ -54,12 +54,12 @@ packages:
   original:
     hackage: polysemy-1.3.0.0@sha256:fa76e96a883fd1c4bdbad792a0a9d88f59f84817651aea5c71d9b4f74e42c5b6,6141
 - completed:
-    hackage: hspec-hedgehog-0.0.1.2@sha256:aaeeb50a43d2bce8a1850baa3ddf934a964bfe38c64efd59306b0c1421e55b45,1405
+    hackage: serialport-0.4.7@sha256:faff483f73c8e8e9661dae3788795bb0f4a38413a49fccb77bcdc6827af50182,1430
     pantry-tree:
-      size: 379
-      sha256: 1da6604fc3e0ce9af8742a631da413a845bbfc49aeff3a304ff9cebc1518b689
+      size: 762
+      sha256: 50b9cd8cc7937d91834a499171f8d0904f63381dda4d90b546fa6f16f1bec2c3
   original:
-    hackage: hspec-hedgehog-0.0.1.2
+    hackage: serialport-0.4.7@sha256:faff483f73c8e8e9661dae3788795bb0f4a38413a49fccb77bcdc6827af50182,1430
 snapshots:
 - completed:
     size: 496111
