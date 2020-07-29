@@ -12,7 +12,7 @@ import qualified Polysemy.Error as P
 import Control.Exception(bracket, catch, IOException)
 import Control.Applicative((<|>))
 import System.Hardware.Serialport (SerialPort, openSerial, closeSerial, recv, defaultSerialSettings, CommSpeed(..), commSpeed)
-import Effects.Env(Env, getEnvironmentConfiguration)
+import Effects.Env(Env, getConfiguration)
 import Configuration(Configuration(..), SerialConfig(..), BaudRate(..), serialBaudRate, serialPort)
 import qualified Data.ByteString.Char8 as B
 import Data.Void (Void)
@@ -79,15 +79,12 @@ readTelegramSerial s = readTelegramSerial' s ""
 runTelegramReaderSerial :: P.Members '[Env, P.Embed IO, P.Error DsmrMetricException] r => P.Sem (DsmrTelegramReader ': r) a -> P.Sem r a
 runTelegramReaderSerial = P.interpret $ \case
   ReadTelegram -> do
-    eitherCfg <- getEnvironmentConfiguration
-    case eitherCfg of
-      Left str -> P.throw . ConfigurationException $ "Failed to get configuration from environment: " ++ str
-      Right (cfg :: Configuration) -> do
-        let serCfg = serialConfig cfg
-        let (port, baudRate) = (\c -> (serialPort c, serialBaudRate c)) serCfg
-        let handleSerialException = P.fromExceptionVia (\(e :: IOException) -> SerialPortException (show e))
-        let openSerialPort = openSerial port defaultSerialSettings {commSpeed = toCommSpeed(baudRate)} 
-        handleSerialException $ bracket openSerialPort closeSerial readTelegramSerial  -- TODO: prevent serial port from having to be opened and closed each time
+    cfg <- getConfiguration
+    let serCfg = serialConfig cfg
+    let (port, baudRate) = (\c -> (serialPort c, serialBaudRate c)) serCfg
+    let handleSerialException = P.fromExceptionVia (\(e :: IOException) -> SerialPortException (show e))
+    let openSerialPort = openSerial port defaultSerialSettings {commSpeed = toCommSpeed(baudRate)} 
+    handleSerialException $ bracket openSerialPort closeSerial readTelegramSerial  -- TODO: prevent serial port from having to be opened and closed each time
 {-# INLINE runTelegramReaderSerial #-}
 
 toCommSpeed :: BaudRate -> CommSpeed

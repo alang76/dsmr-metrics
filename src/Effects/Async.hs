@@ -1,5 +1,4 @@
 -- Taken from Polysemy.Async, then added the AwaitAny and Cancel constructors
-
 module Effects.Async
   ( -- * Effect
     Async (..)

@@ -24,25 +24,6 @@ import qualified Polysemy.Output as P
 import qualified Polysemy.Error as P
 import Exceptions.DsmrMetricException(DsmrMetricException(..))
 import Events.DsmrMetricEvent(DsmrMetricEvent(..), ThreadID)
-{--
-simulateMain :: (P.Sem (MetricsWebServer ': r) a -> P.Sem r a) ->
-                (P.Sem (DsmrTelegramReader ': r) a -> P.Sem r a) ->
-                (P.Sem (Env ': r) a -> P.Sem r a) ->
-                (P.Sem (UpdatePrometheusMetric:r) a -> P.Sem r a) ->
-                IO ([DsmrMetricEvent], Either DsmrMetricException ([String], ()))
-simulateMain webServerEffect telegramReaderEffect envEffect updateMetricEffect = runApp
-                & webServerEffect
-                & telegramReaderEffect
-                & envEffect
-                & updateMetricEffect
-                & P.runOutputList @String
-                & asyncToIO
-                & P.errorToIOFinal @DsmrMetricException
-                & P.runOutputList @DsmrMetricEvent
-                & P.embedToFinal @IO
-                & P.runFinal
-
-                --}
 
 simulateMain :: (forall r. P.Sem (MetricsWebServer ': r) () -> P.Sem r ())
              -> (forall r. P.Member Env r => P.Sem (DsmrTelegramReader ': r) () -> P.Sem r ())
@@ -69,10 +50,6 @@ isProgramTerminated :: DsmrMetricEvent -> Bool
 isProgramTerminated ProgramTerminated = True
 isProgramTerminated _ = False
 
--- isDsmrTelegramReaderThreadStarted :: DsmrMetricEvent -> Bool
--- isDsmrTelegramReaderThreadStarted (DsmrTelegramReaderThreadStarted _) = True
--- isDsmrTelegramReaderThreadStarted _ = False
-
 getThreadID :: DsmrMetricEvent -> Maybe ThreadID
 getThreadID (MetricsWebServerThreadStarted threadID) = Just threadID
 getThreadID (DsmrTelegramReaderThreadStarted threadID) = Just threadID
@@ -91,27 +68,6 @@ matchThreadID threadID maybeMatchID =
   case maybeMatchID of
     Just matchID -> threadID == matchID
     Nothing -> True
-
--- isDsmrTelegramReceived :: DsmrMetricEvent -> Bool
--- isDsmrTelegramReceived (DsmrTelegramReceived _) = True
--- isDsmrTelegramReceived _ = False
-
--- isDsmrTelegramParseError :: DsmrMetricEvent -> Bool
--- isDsmrTelegramParseError (DsmrTelegramParseError _) = True
--- isDsmrTelegramParseError _ = False
-
--- isDsmrTelegramParsed :: DsmrMetricEvent -> Bool
--- isDsmrTelegramParsed (DsmrTelegramParsed _) = True
--- isDsmrTelegramParsed _ = False
-
--- isInvalidConfigurationDetected :: DsmrMetricEvent -> Bool
--- isInvalidConfigurationDetected (InvalidConfigurationDetected _) = True
--- isInvalidConfigurationDetected _ = False
-
--- isFatalExceptionDetected :: DsmrMetricEvent -> Bool
--- isFatalExceptionDetected (FatalExceptionDetected _) = True
--- isFatalExceptionDetected _ = False
-
 
 testApp :: IO ()
 testApp = do
@@ -141,3 +97,10 @@ testApp = do
 
       it "Configuration exception is raised to toplevel" $
         resConfigThrown `shouldBe ` Left (ConfigurationException "Fake exception")
+      
+      --TODO: Test following:
+      -- test whether succesfully parsed telegram is passed to callback
+      -- force readTelegram thread termination
+      -- simulate reading of bad (non-parseable) data 
+      -- simulate web server IO error
+      

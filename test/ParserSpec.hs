@@ -214,6 +214,8 @@ testParser = do
       it "produced a single telegram parsed event" $
         (length . filter (==True) . map isParsedEvent $ outputList) `shouldBe` 1
 
+      -- ensure non-parseable data is handled correctly
+
   -- hedgehog tests
   res <- hedgehogTests
   putStrLn $ "result of hedgehog tests: " ++ show res

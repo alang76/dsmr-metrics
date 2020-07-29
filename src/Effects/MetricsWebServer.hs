@@ -15,9 +15,9 @@ data MetricsWebServer m a where
 
 P.makeSem ''MetricsWebServer
 
+-- TODO: catch IO Exceptions (such as port in use)
 runWebServerIO  :: P.Member (P.Embed IO) r => P.Sem (MetricsWebServer ': r) a -> P.Sem r a
 runWebServerIO = P.interpret $ \case 
     (RunMetricsServer port app) -> P.embed $ do
         _ <- PM.register PM.ghcMetrics
         W.run port app
-

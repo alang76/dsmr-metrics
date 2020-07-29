@@ -7,6 +7,7 @@ module Configuration
         , SerialConfig(..)
         , BaudRate(..)
         , ConfigurationException(..)
+        , WebServerConfig(..)
     )
 where
 
@@ -15,14 +16,17 @@ import Data.Aeson (eitherDecode, parseJSON, FromJSON, Value(Object), (.:), withT
 import Data.ByteString.Lazy.Char8 (pack, ByteString)
 import Control.Exception(Exception, SomeException, try, throw)
 import Data.Text(unpack)
+import qualified Polysemy as P
+import qualified Polysemy.Error as P
+import Exceptions.DsmrMetricException(DsmrMetricException)
 
 data ConfigurationException = ConfigurationException String deriving Show
 
 instance Exception ConfigurationException
 
 data Configuration = Configuration {
-    serialConfig :: SerialConfig
-    --, loglevel :: LogLevel -- todo, implement proper logging
+    serialConfig :: SerialConfig,
+    webServerConfig :: WebServerConfig
 } deriving Show
 
 
@@ -33,6 +37,9 @@ data SerialConfig = SerialConfig {
     serialBaudRate :: BaudRate
 } deriving (Show)
 
+data WebServerConfig = WebServerConfig {
+    listenPort :: Int
+} deriving (Show)
 
 data BaudRate = 
       BR110
@@ -64,6 +71,11 @@ instance FromJSON BaudRate where
         x -> fail $ "Error parsing baudrate config value, got '" ++ unpack x ++ "' which is not one of the allowed values ('110', '300', '600', '1200', '2400', '4800', '9600', '19200', '38400', '57600' or '11520')."
 
 
+instance FromJSON WebServerConfig where
+    parseJSON (Object obj) = WebServerConfig 
+        <$> obj .: "listenPort"
+    parseJSON obj = fail $ show obj
+
 instance FromJSON SerialConfig where
     parseJSON (Object obj) = SerialConfig
         <$> obj .: "port"
@@ -73,7 +85,9 @@ instance FromJSON SerialConfig where
 instance FromJSON Configuration where
     parseJSON (Object obj) = Configuration 
         <$> obj .: "serial"
+        <*> obj .: "webServer"
     parseJSON obj = fail $ show obj
+
 
 loadConfig :: IO (Either String Configuration)
 loadConfig = do
@@ -81,3 +95,5 @@ loadConfig = do
     case eitherConfigFile of 
         Left ex -> return $ Left ("Error opening config file: " ++ show ex)
         Right configFile -> return $ eitherDecode (pack configFile)
+
+
