@@ -53,8 +53,8 @@ maxValueDouble = 9999999999999999999999999999
 genStrVar :: Int -> Gen String
 genStrVar l = Gen.string (Range.linear 0 l) Gen.alphaNum
 
-genStrConst :: Int -> Gen String
-genStrConst l = Gen.string (Range.constant l l) Gen.alphaNum
+getStrCheckSum :: Int -> Gen String
+getStrCheckSum l = Gen.string (Range.constant l l) (Gen.choice [Gen.upper, Gen.digit])
 
 genDouble :: Gen Double
 genDouble = Gen.double (Range.linearFrac 0 maxValueDouble)
@@ -99,7 +99,7 @@ genTelegram =
   <*> genInt                    -- slaveGasMeterDeviceTypeGen        
   <*> genStrVar 96              -- gasMeterSerialNumberGen           
   <*> genStampedValue genDouble -- gasConsumptionGen                 
-  <*> genInteger                -- checkSumGen                       
+  <*> getStrCheckSum 4          -- checkSumGen                       
 
 propTripTelegram :: Property
 propTripTelegram = property $ do

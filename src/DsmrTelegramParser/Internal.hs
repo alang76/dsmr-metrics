@@ -17,7 +17,6 @@ import qualified Polysemy as P
 import qualified Polysemy.Output as P
 
 import Model.DsmrTelegram
-import Effects.DsmrTelegramReader (DsmrTelegramReader(..), readTelegram)
 import Effects.Env (Env(..), getEnvironmentTimeZone, getEnvironmentTimeCentury)
 import Util.Time (localTimeStampToUTC)
 import Events.DsmrMetricEvent(DsmrMetricEvent(..))
@@ -35,7 +34,7 @@ dsmrTelegramParserP = do
       fields <- fieldsParser
       _ <- char '!'
       checkSum_ <- some (upperChar <|> digitChar)
-      return $ DsmrTelegram meterID_ fields (read checkSum_)
+      return $ DsmrTelegram meterID_ fields checkSum_
 
 dsmrFieldsParserP :: P.Member Env r => P.Sem r (Parser [DsmrField])
 dsmrFieldsParserP = do
@@ -191,7 +190,7 @@ runDsmrParser input = do
   let parseResult = parse parser "" input
   case parseResult of
           Left parseErrorBundle -> do
-            P.output . DsmrTelegramParseError $ (errorBundlePretty parseErrorBundle)
+            P.output . DsmrTelegramParseError $ errorBundlePretty parseErrorBundle
             return Nothing
           Right dsmrTelegram -> do
              P.output $ DsmrTelegramParsed dsmrTelegram

@@ -12,7 +12,6 @@ import Data.Time.Clock(UTCTime(..))
 import Data.Maybe(fromJust)
 import Effects.Env
 import Util.Time(utcToLocalTimeStamp, localTimeStampToUTC)
-
 import qualified Polysemy as P
 
 telegram :: String
@@ -41,7 +40,7 @@ telegram =
     \0-1:24.1.0(003)\n\
     \0-1:96.1.0(4730303137353931323139313130333134)\n\
     \0-1:24.2.1(200529160000S)(05277.053*m3)\n\
-    \!7667\n"
+    \!7A67\n"
 
 
 createTestTelegram :: P.Member Env r => P.Sem r DsmrTelegram
@@ -76,7 +75,7 @@ createTestTelegram = do
       3                                                   -- slaveGasMeterDeviceType
       "4730303137353931323139313130333134"                -- gasMeterSerialNumber
       (gasTimeUtc, 5277.053)                              -- gasConsumption
-      7667                                                -- checkSum
+      "AAA1"                                              -- checkSum
 
 buildTelegram :: MeterID -> Integer -> UTCTime -> String -> Double -> Double -> Double -> Double ->
                  Int -> Double -> Double -> Integer -> Integer -> [(UTCTime, Integer)] -> Integer -> Integer -> Integer ->
@@ -131,7 +130,7 @@ buildTelegram
 serializeTelegram :: P.Member Env r => DsmrTelegram -> P.Sem r String
 serializeTelegram (DsmrTelegram _meterID fields _checkSum) = do
   serializedFields <- concat <$> mapM serializeField fields
-  return ("/" ++ _meterID ++ "\n" ++ serializedFields ++ "!" ++ show _checkSum ++ "\n")
+  return ("/" ++ _meterID ++ "\n" ++ serializedFields ++ "!" ++ _checkSum ++ "\n")
 
 
 -- TODO DRYify field ID mapping, cleanup on isle 4

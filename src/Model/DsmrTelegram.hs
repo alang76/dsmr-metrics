@@ -9,7 +9,7 @@ data DsmrTelegram = DsmrTelegram {
   _checkSum :: Checksum} -- ignored for now TODO
   deriving (Eq, Show)
 type MeterID = String
-type Checksum = Integer
+type Checksum = String
 
 data DsmrField =
       VersionNumber                 { _versionNumber                  :: Integer }
