@@ -1,10 +1,10 @@
 
 import TimeSpec(testTime)
 import ParserSpec(testParser)
-import ReadMetricsSpec(testReadMetrics)
+import AppSpec(testApp)
 
 main :: IO () 
 main = do
   testTime
   testParser
-  testReadMetrics
+  testApp

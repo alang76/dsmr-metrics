@@ -7,12 +7,11 @@ module TelegramBuilder
   )
 where
 
-import DsmrMetricsReader.Model
+import Model.DsmrTelegram(DsmrTelegram(..), DsmrField(..), Checksum, MeterID)
 import Data.Time.Clock(UTCTime(..))
 import Data.Maybe(fromJust)
 import Effects.Env
-import Util.Time(utcToLocalTimeStamp, localTimeStampToUTC, mkUTCTime)
-import Effects.DsmrTelegramReader(DsmrTelegramReader(..))
+import Util.Time(utcToLocalTimeStamp, localTimeStampToUTC)
 
 import qualified Polysemy as P
 
@@ -54,7 +53,7 @@ createTestTelegram = do
     log1TimeUtc = fromJust $ localTimeStampToUTC timeZone century "170326062519S"
     log2TimeUtc = fromJust $ localTimeStampToUTC timeZone century "160417043131S"
     gasTimeUtc = fromJust $ localTimeStampToUTC timeZone century "200529160000S"
-  pure $ buildTelegram  
+  pure $ buildTelegram
       "XMX5LGBBFFB231215493"                              -- meter ID
       42                                                  -- version ID
       timeStampUtc                                        -- timestamp
@@ -64,20 +63,20 @@ createTestTelegram = do
       14628.043                                           -- energyReturnedTariff1
       0                                                   -- energyReturnedTariff2
       2                                                   -- actualTariffIndicator
-      3.877                                               -- actualPowerConsumption        
-      0                                                   -- actualPowerReturned           
-      3                                                   -- numberOfPowerFailures         
-      2                                                   -- numberOfLongPowerFailures     
-      [(log1TimeUtc, 29642045), (log2TimeUtc, 32998738)]  -- powerFailureLog               
-      0                                                   -- numberOfVoltageSagsPhaseL1    
-      0                                                   -- numberOfVoltageSagsPhaseL2    
-      17                                                  -- actualCurrentConsumption      
-      3.877                                               -- actualPowerConsumptionPhaseL1 
-      0                                                   -- actualPowerReturnedPhaseL1    
-      3                                                   -- slaveGasMeterDeviceType       
-      "4730303137353931323139313130333134"                -- gasMeterSerialNumber          
-      (gasTimeUtc, 5277.053)                              -- gasConsumption 
-      7667                                                -- checkSum 
+      3.877                                               -- actualPowerConsumption
+      0                                                   -- actualPowerReturned
+      3                                                   -- numberOfPowerFailures
+      2                                                   -- numberOfLongPowerFailures
+      [(log1TimeUtc, 29642045), (log2TimeUtc, 32998738)]  -- powerFailureLog
+      0                                                   -- numberOfVoltageSagsPhaseL1
+      0                                                   -- numberOfVoltageSagsPhaseL2
+      17                                                  -- actualCurrentConsumption
+      3.877                                               -- actualPowerConsumptionPhaseL1
+      0                                                   -- actualPowerReturnedPhaseL1
+      3                                                   -- slaveGasMeterDeviceType
+      "4730303137353931323139313130333134"                -- gasMeterSerialNumber
+      (gasTimeUtc, 5277.053)                              -- gasConsumption
+      7667                                                -- checkSum
 
 buildTelegram :: MeterID -> Integer -> UTCTime -> String -> Double -> Double -> Double -> Double ->
                  Int -> Double -> Double -> Integer -> Integer -> [(UTCTime, Integer)] -> Integer -> Integer -> Integer ->
@@ -139,7 +138,7 @@ serializeTelegram (DsmrTelegram _meterID fields _checkSum) = do
 serializeField :: P.Member Env r => DsmrField -> P.Sem r String
 serializeField field = do
   timeZone <- getEnvironmentTimeZone
-  let    
+  let
     showPowerFailureLog :: P.Member Env r => [(UTCTime, Integer)] -> P.Sem r String
     showPowerFailureLog _log = do
       logEntries <- concat <$> mapM showLogEntry _log

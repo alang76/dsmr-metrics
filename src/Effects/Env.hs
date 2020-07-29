@@ -26,3 +26,4 @@ runEnvIO = P.interpret $ \case
     let (year, _, _) = toGregorian $ utctDay curTimeUtc
     return $ floor ((fromInteger year :: Double) / 100)
   GetEnvironmentConfiguration -> P.embed loadConfig
+{-# INLINE runEnvIO #-}

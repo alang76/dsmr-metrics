@@ -8,7 +8,7 @@ where
 
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import Hedgehog (tripping, checkParallel, forAll, property, Gen, Property, Group(..), Range)
+import Hedgehog (tripping, checkParallel, forAll, property, Gen, Property, Group(..))
 import Data.Time.Clock(UTCTime(..), secondsToDiffTime)
 import Data.Time.Calendar(fromGregorian)
 import Data.Time.LocalTime(TimeZone(..))

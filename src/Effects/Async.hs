@@ -1,6 +1,6 @@
 -- Taken from Polysemy.Async, then added the AwaitAny and Cancel constructors
 
-module Effects.AsyncEffect
+module Effects.Async
   ( -- * Effect
     Async (..)
 
@@ -115,5 +115,4 @@ asyncToIOFinal = interpretFinal $ \case
   Await a -> liftS (A.wait a)
   AwaitAny as -> liftS (A.waitAny as)
   Cancel a -> liftS (A.cancel a)
-
 {-# INLINE asyncToIOFinal #-}

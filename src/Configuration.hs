@@ -5,15 +5,20 @@ module Configuration
         Configuration(..)
         , loadConfig
         , SerialConfig(..)
-        , CommSpeed(..)
+        , BaudRate(..)
+        , ConfigurationException(..)
     )
 where
 
+
 import Data.Aeson (eitherDecode, parseJSON, FromJSON, Value(Object), (.:), withText)
-import Data.Word (Word16)
-import Data.ByteString.Lazy.Char8 (pack,ByteString)
-import System.Hardware.Serialport (CommSpeed(..))
-import Control.Exception(try, SomeException)
+import Data.ByteString.Lazy.Char8 (pack, ByteString)
+import Control.Exception(Exception, SomeException, try, throw)
+import Data.Text(unpack)
+
+data ConfigurationException = ConfigurationException String deriving Show
+
+instance Exception ConfigurationException
 
 data Configuration = Configuration {
     serialConfig :: SerialConfig
@@ -25,22 +30,38 @@ data LogLevel = Debug | Warning | Info | Error | Critical deriving Show
 
 data SerialConfig = SerialConfig {
     serialPort :: String, --"/dev/ttyUSB0" (Linux), "COM 3" (Windows)
-    serialBaudRate :: CommSpeed
+    serialBaudRate :: BaudRate
 } deriving (Show)
 
-instance FromJSON CommSpeed where
-    parseJSON  = withText "CommSpeed" $ \case
-        "CS110"    -> return CS110
-        "CS300"    -> return CS300
-        "CS600"    -> return CS600
-        "CS1200"   -> return CS1200
-        "CS2400"   -> return CS2400
-        "CS4800"   -> return CS4800
-        "CS9600"   -> return CS9600
-        "CS19200"  -> return CS19200
-        "CS38400"  -> return CS38400
-        "CS57600"  -> return CS57600
-        "CS115200" -> return CS115200
+
+data BaudRate = 
+      BR110
+    | BR300
+    | BR600
+    | BR1200
+    | BR2400
+    | BR4800
+    | BR9600
+    | BR19200
+    | BR38400
+    | BR57600
+    | BR115200
+    deriving (Show, Eq)
+
+instance FromJSON BaudRate where
+    parseJSON  = withText "BaudRate" $ \case
+        "110"    -> return BR110
+        "300"    -> return BR300
+        "600"    -> return BR600
+        "1200"   -> return BR1200
+        "2400"   -> return BR2400
+        "4800"   -> return BR4800
+        "9600"   -> return BR9600
+        "19200"  -> return BR19200
+        "38400"  -> return BR38400
+        "57600"  -> return BR57600
+        "115200" -> return BR115200
+        x -> fail $ "Error parsing baudrate config value, got '" ++ unpack x ++ "' which is not one of the allowed values ('110', '300', '600', '1200', '2400', '4800', '9600', '19200', '38400', '57600' or '11520')."
 
 
 instance FromJSON SerialConfig where
@@ -54,15 +75,9 @@ instance FromJSON Configuration where
         <$> obj .: "serial"
     parseJSON obj = fail $ show obj
 
-
-config = pack "{ \"database\": { \"host\": \"db\", \"port\": 1234, \"username\": \"ledger\",  \"password\": \"ledger\", \"database_name\": \"ledger\" } }"
-
-
 loadConfig :: IO (Either String Configuration)
 loadConfig = do
     eitherConfigFile <- try (readFile "dsmr-metrics.cfg") :: IO (Either SomeException String)
     case eitherConfigFile of 
         Left ex -> return $ Left ("Error opening config file: " ++ show ex)
         Right configFile -> return $ eitherDecode (pack configFile)
-
-

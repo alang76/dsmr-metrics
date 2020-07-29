@@ -10,9 +10,6 @@ import Data.Fixed (Pico)
 import Data.Time.Clock(UTCTime(..))
 import Data.Time.LocalTime(TimeZone(..), ZonedTime(..), TimeOfDay(..), localTimeToUTC, utcToZonedTime, zonedTimeToLocalTime, timeOfDayToTime)
 import Data.Time.Format(parseTimeM, defaultTimeLocale, formatTime)
-import Data.Time.Calendar(fromGregorian)
-import Effects.Env
-import Polysemy as P
 
 localTimeStampToUTC :: TimeZone ->  Integer -> String -> Maybe UTCTime
 localTimeStampToUTC timeZone century timeStr = do

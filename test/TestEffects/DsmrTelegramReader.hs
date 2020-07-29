@@ -6,7 +6,12 @@ where
 import qualified Polysemy as P
 import Effects.DsmrTelegramReader
 import TelegramBuilder(telegram)
+import Effects.Env(Env, getEnvironmentConfiguration)
 
-runTelegramReaderFakePure :: P.Sem (DsmrTelegramReader ': r) a  -> P.Sem r a
+runTelegramReaderFakePure :: P.Member Env r => P.Sem (DsmrTelegramReader ': r) a  -> P.Sem r a
 runTelegramReaderFakePure = P.interpret $ \case
-  ReadTelegram -> return telegram
+  ReadTelegram -> do
+    config <- getEnvironmentConfiguration -- fake use of config
+    case config of
+      Left _ -> return telegram
+      Right _ -> return telegram

@@ -1,4 +1,4 @@
-module DsmrMetricsReader.Model where
+module Model.DsmrTelegram where
 
 import Data.Time (UTCTime)
 import Control.Lens.TH (makeLenses, makePrisms)

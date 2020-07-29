@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 942cc2a117c8b4e2b969164c5de047a0b97ad448955c08b13a49a8d8183dc14d
+-- hash: e7ceb581933d57cdfced2f71cacece6addb5ee2e3ca1730c05e7074f26fa9035
 
 name:           dsmr-metrics
 version:        0.1.0.0
@@ -14,7 +14,7 @@ bug-reports:    https://github.com/githubuser/dsmr-metrics/issues
 author:         Arjen Langebaerd
 maintainer:     arjen@langebaerd.net
 copyright:      2020 AArjen Langebaerd
-license:        BSD3
+license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -27,15 +27,18 @@ source-repository head
 
 library
   exposed-modules:
+      App
       Configuration
-      DsmrMetricsReader
-      DsmrMetricsReader.Internal
-      DsmrMetricsReader.Model
-      Effects.AsyncEffect
+      DsmrTelegramParser
+      DsmrTelegramParser.Internal
+      Effects.Async
       Effects.DsmrTelegramReader
       Effects.Env
-      Lib
-      PrometheusMetricsServer
+      Effects.MetricsWebServer
+      Effects.UpdatePrometheusMetric
+      Events.DsmrMetricEvent
+      Exceptions.DsmrMetricException
+      Model.DsmrTelegram
       Util.Time
   other-modules:
       Paths_dsmr_metrics
@@ -47,6 +50,9 @@ library
     , async >=2.2.2 && <2.3
     , base >=4.13 && <4.14
     , bytestring >=0.10.10.0 && <0.11
+    , co-log-core >=0.2.1.1 && <0.3
+    , co-log-polysemy >=0.0.1.2 && <0.1
+    , hashable >=1.3.0.0 && <1.4
     , http-types >=0.12.3 && <0.13
     , lens >=4.18.1 && <4.19
     , megaparsec >=8.0.0 && <8.1
@@ -70,13 +76,16 @@ executable dsmr-metrics-exe
   hs-source-dirs:
       app
   default-extensions: DataKinds FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables TypeApplications TypeOperators TypeFamilies TemplateHaskell
-  ghc-options: -threaded -rtsopts "-with-rtsopts=-T -N" -fplugin=Polysemy.Plugin -O2 -flate-specialise -fspecialise-aggressively -Wall
+  ghc-options: -threaded -rtsopts "-with-rtsopts=-T -N" -fplugin=Polysemy.Plugin -O2 -flate-specialise -fspecialise-aggressively -Wall -Werror
   build-depends:
       aeson >=1.4.7.1 && <1.5
     , async >=2.2.2 && <2.3
     , base >=4.13 && <4.14
     , bytestring >=0.10.10.0 && <0.11
+    , co-log-core >=0.2.1.1 && <0.3
+    , co-log-polysemy >=0.0.1.2 && <0.1
     , dsmr-metrics
+    , hashable >=1.3.0.0 && <1.4
     , http-types >=0.12.3 && <0.13
     , lens >=4.18.1 && <4.19
     , megaparsec >=8.0.0 && <8.1
@@ -97,26 +106,31 @@ test-suite dsmr-metrics-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      AppSpec
       ParserSpec
-      ReadMetricsSpec
       SampleInput
       TelegramBuilder
       TestEffects.DsmrTelegramReader
       TestEffects.Env
+      TestEffects.MetricsWebServer
+      TestEffects.UpdatePrometheusMetric
       TimeSpec
       Paths_dsmr_metrics
   hs-source-dirs:
       test
   default-extensions: DataKinds FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables TypeApplications TypeOperators TypeFamilies TemplateHaskell
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fplugin=Polysemy.Plugin -Wall
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fplugin=Polysemy.Plugin -Wall -Werror
   build-depends:
       QuickCheck >=2.13.2 && <2.14
     , aeson >=1.4.7.1 && <1.5
     , async >=2.2.2 && <2.3
     , base >=4.13 && <4.14
     , bytestring >=0.10.10.0 && <0.11
+    , co-log-core >=0.2.1.1 && <0.3
+    , co-log-polysemy >=0.0.1.2 && <0.1
     , deepseq >=1.4.4.0 && <1.5
     , dsmr-metrics
+    , hashable >=1.3.0.0 && <1.4
     , hedgehog >=1.0.2 && <1.1.0
     , hspec >=2.7.1 && <2.8
     , http-types >=0.12.3 && <0.13
