@@ -8,3 +8,4 @@ main = do
   testTime
   testParser
   testApp
+  -- TODO Add config tests

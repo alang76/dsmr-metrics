@@ -13,12 +13,9 @@ where
 
 
 import Data.Aeson (eitherDecode, parseJSON, FromJSON, Value(Object), (.:), withText)
-import Data.ByteString.Lazy.Char8 (pack, ByteString)
-import Control.Exception(Exception, SomeException, try, throw)
+import Data.ByteString.Lazy.Char8 (pack)
+import Control.Exception(Exception, SomeException, try)
 import Data.Text(unpack)
-import qualified Polysemy as P
-import qualified Polysemy.Error as P
-import Exceptions.DsmrMetricException(DsmrMetricException)
 
 data ConfigurationException = ConfigurationException String deriving Show
 

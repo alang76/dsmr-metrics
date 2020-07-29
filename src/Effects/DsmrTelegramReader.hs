@@ -9,7 +9,7 @@ module Effects.DsmrTelegramReader (
 
 import qualified Polysemy as P
 import qualified Polysemy.Error as P
-import Control.Exception(bracket, catch, IOException)
+import Control.Exception(bracket, IOException)
 import Control.Applicative((<|>))
 import System.Hardware.Serialport (SerialPort, openSerial, closeSerial, recv, defaultSerialSettings, CommSpeed(..), commSpeed)
 import Effects.Env(Env, getConfiguration)

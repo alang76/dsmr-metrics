@@ -5,6 +5,7 @@ module Util.Time
         mkUTCTime
     ) where
 
+import Prelude hiding (min)
 import Data.Time.Calendar(fromGregorian)
 import Data.Fixed (Pico)
 import Data.Time.Clock(UTCTime(..))
