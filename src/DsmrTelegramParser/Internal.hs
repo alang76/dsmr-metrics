@@ -62,8 +62,8 @@ dsmrFieldParserP =
   <||> fieldParserP "1-3:0.2.8"       valueIntegerParserP     VersionNumber
   <||> fieldParserP "0-0:96.1.1"      valueStringParserP      EquipmentID
   <||> fieldParserP "1-0:1.8.1"       valueEnergyParserP      EnergyConsumedTariff1
-  <||> fieldParserP "1-0:2.8.1"       valueEnergyParserP      EnergyConsumedTariff2
-  <||> fieldParserP "1-0:1.8.2"       valueEnergyParserP      EnergyReturnedTariff1
+  <||> fieldParserP "1-0:2.8.1"       valueEnergyParserP      EnergyReturnedTariff1
+  <||> fieldParserP "1-0:1.8.2"       valueEnergyParserP      EnergyConsumedTariff2
   <||> fieldParserP "1-0:2.8.2"       valueEnergyParserP      EnergyReturnedTariff2
   <||> fieldParserP "0-0:96.14.0"     valueIntParserP         ActualTariffIndicator
   <||> fieldParserP "1-0:1.7.0"       valuePowerParserP       ActualPowerConsumption

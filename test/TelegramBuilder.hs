@@ -58,8 +58,8 @@ createTestTelegram = do
       timeStampUtc                                        -- timestamp
       "4530303034303031353934373534343134"                -- equipment ID
       14765.683                                           -- energyConsumedTariff1
-      0                                                   -- energyConsumedTariff2
-      14628.043                                           -- energyReturnedTariff1
+      0                                                   -- energyReturnedTariff1
+      14628.043                                           -- energyConsumedTariff2
       0                                                   -- energyReturnedTariff2
       2                                                   -- actualTariffIndicator
       3.877                                               -- actualPowerConsumption
@@ -86,8 +86,8 @@ buildTelegram
   _timeStamp                        -- UTCTime
   _equipmentID                      -- String
   _energyConsumedTariff1            -- Double
-  _energyConsumedTariff2            -- Double
   _energyReturnedTariff1            -- Double
+  _energyConsumedTariff2            -- Double
   _energyReturnedTariff2            -- Double
   _actualTariffIndicator            -- Int
   _actualPowerConsumption           -- Double
@@ -108,8 +108,8 @@ buildTelegram
                    TimeStamp                     _timeStamp,
                    EquipmentID                   _equipmentID,
                    EnergyConsumedTariff1         _energyConsumedTariff1,
-                   EnergyConsumedTariff2         _energyConsumedTariff2,
                    EnergyReturnedTariff1         _energyReturnedTariff1,
+                   EnergyConsumedTariff2         _energyConsumedTariff2,
                    EnergyReturnedTariff2         _energyReturnedTariff2,
                    ActualTariffIndicator         _actualTariffIndicator,
                    ActualPowerConsumption        _actualPowerConsumption,
@@ -132,7 +132,6 @@ serializeTelegram (DsmrTelegram _meterID fields _checkSum) = do
   serializedFields <- concat <$> mapM serializeField fields
   return ("/" ++ _meterID ++ "\n" ++ serializedFields ++ "!" ++ _checkSum ++ "\n")
 
-
 -- TODO DRYify field ID mapping, cleanup on isle 4
 serializeField :: P.Member Env r => DsmrField -> P.Sem r String
 serializeField field = do
@@ -151,8 +150,8 @@ serializeField field = do
     TimeStamp                     _timeStamp ->                     pure $ "0-0:1.0.0("   ++ utcToLocalTimeStamp timeZone _timeStamp ++ ")\n"
     EquipmentID                   _equipmentID ->                   pure $ "0-0:96.1.1("  ++ _equipmentID ++ ")\n"
     EnergyConsumedTariff1         _energyConsumedTariff1 ->         pure $ "1-0:1.8.1("   ++ show _energyConsumedTariff1 ++ "*kWh)\n"
-    EnergyConsumedTariff2         _energyConsumedTariff2 ->         pure $ "1-0:2.8.1("   ++ show _energyConsumedTariff2 ++ "*kWh)\n"
-    EnergyReturnedTariff1         _energyReturnedTariff1 ->         pure $ "1-0:1.8.2("   ++ show _energyReturnedTariff1 ++ "*kWh)\n"
+    EnergyReturnedTariff1         _energyReturnedTariff1 ->         pure $ "1-0:2.8.1("   ++ show _energyReturnedTariff1 ++ "*kWh)\n"
+    EnergyConsumedTariff2         _energyConsumedTariff2 ->         pure $ "1-0:1.8.2("   ++ show _energyConsumedTariff2 ++ "*kWh)\n"
     EnergyReturnedTariff2         _energyReturnedTariff2 ->         pure $ "1-0:2.8.2("   ++ show _energyReturnedTariff2 ++ "*kWh)\n"
     ActualTariffIndicator         _actualTariffIndicator ->         pure $ "0-0:96.14.0(" ++ show _actualTariffIndicator ++ ")\n"
     ActualPowerConsumption        _actualPowerConsumption ->        pure $ "1-0:1.7.0("   ++ show _actualPowerConsumption ++ "*kW)\n"

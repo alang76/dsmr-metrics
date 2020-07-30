@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module ParserSpec where  
+module ParserSpec where
 
 import Test.Hspec (shouldBe, it, describe, hspec)
 import qualified Hedgehog.Gen as Gen
@@ -75,31 +75,31 @@ genPowerFailureLog :: Gen [(UTCTime, Integer)]
 genPowerFailureLog = Gen.list (Range.linear 0 10000) (genStampedValue genInteger)
 
 genTelegram :: Gen DsmrTelegram
-genTelegram = 
-  buildTelegram 
-  <$> genStrVar 96              -- meterIdGen                        
-  <*> genInteger                -- versionNumberGen                  
-  <*> genUTCTime                -- timeStampGen                      
-  <*> genStrVar 96              -- equipmentIDGen                    
-  <*> genDouble                 -- energyConsumedTariff1Gen          
-  <*> genDouble                 -- energyConsumedTariff2Gen          
-  <*> genDouble                 -- energyReturnedTariff1Gen          
-  <*> genDouble                 -- energyReturnedTariff2Gen          
-  <*> genInt                    -- actualTariffIndicatorGen          
-  <*> genDouble                 -- actualPowerConsumptionGen         
-  <*> genDouble                 -- actualPowerReturnedGen            
-  <*> genInteger                -- numberOfPowerFailuresGen          
-  <*> genInteger                -- numberOfLongPowerFailuresGen      
-  <*> genPowerFailureLog        -- powerFailureLogGen                
-  <*> genInteger                -- numberOfVoltageSagsPhaseL1Gen     
-  <*> genInteger                -- numberOfVoltageSagsPhaseL2Gen     
-  <*> genInteger                -- actualCurrentConsumptionGen       
-  <*> genDouble                 -- actualPowerConsumptionPhaseL1Gen  
-  <*> genDouble                 -- actualPowerReturnedPhaseL1Gen     
-  <*> genInt                    -- slaveGasMeterDeviceTypeGen        
-  <*> genStrVar 96              -- gasMeterSerialNumberGen           
-  <*> genStampedValue genDouble -- gasConsumptionGen                 
-  <*> getStrCheckSum 4          -- checkSumGen                       
+genTelegram =
+  buildTelegram
+  <$> genStrVar 96              -- meterIdGen
+  <*> genInteger                -- versionNumberGen
+  <*> genUTCTime                -- timeStampGen
+  <*> genStrVar 96              -- equipmentIDGen
+  <*> genDouble                 -- energyConsumedTariff1Gen
+  <*> genDouble                 -- energyReturnedTariff1Gen
+  <*> genDouble                 -- energyConsumedTariff2Gen
+  <*> genDouble                 -- energyReturnedTariff2Gen
+  <*> genInt                    -- actualTariffIndicatorGen
+  <*> genDouble                 -- actualPowerConsumptionGen
+  <*> genDouble                 -- actualPowerReturnedGen
+  <*> genInteger                -- numberOfPowerFailuresGen
+  <*> genInteger                -- numberOfLongPowerFailuresGen
+  <*> genPowerFailureLog        -- powerFailureLogGen
+  <*> genInteger                -- numberOfVoltageSagsPhaseL1Gen
+  <*> genInteger                -- numberOfVoltageSagsPhaseL2Gen
+  <*> genInteger                -- actualCurrentConsumptionGen
+  <*> genDouble                 -- actualPowerConsumptionPhaseL1Gen
+  <*> genDouble                 -- actualPowerReturnedPhaseL1Gen
+  <*> genInt                    -- slaveGasMeterDeviceTypeGen
+  <*> genStrVar 96              -- gasMeterSerialNumberGen
+  <*> genStampedValue genDouble -- gasConsumptionGen
+  <*> getStrCheckSum 4          -- checkSumGen
 
 propTripTelegram :: Property
 propTripTelegram = property $ do
@@ -117,7 +117,7 @@ prettyTelegram telegram =
     & P.run
 
 parseTelegram :: String -> Maybe DsmrTelegram
-parseTelegram telegram = 
+parseTelegram telegram =
   runDsmrParser telegram
     & P.ignoreOutput
     & runEnvPureTest
@@ -161,10 +161,10 @@ testParser = do
         headMay (parsedTelegram  ^.. _Just . dsmrFields . traverse . energyConsumedTariff1) `shouldBe` Just 014765.683
 
       it "parsed telegram contains expected EnergyConsumedTariff2" $
-        headMay (parsedTelegram  ^.. _Just . dsmrFields . traverse . energyConsumedTariff2) `shouldBe` Just 0
+        headMay (parsedTelegram  ^.. _Just . dsmrFields . traverse . energyConsumedTariff2) `shouldBe` Just 014628.043
 
       it "parsed telegram contains expected EnergyReturnedTariff1" $
-        headMay (parsedTelegram  ^.. _Just . dsmrFields . traverse . energyReturnedTariff1) `shouldBe` Just 014628.043
+        headMay (parsedTelegram  ^.. _Just . dsmrFields . traverse . energyReturnedTariff1) `shouldBe` Just 0
 
       it "parsed telegram contains expected EnergyReturnedTariff2" $
         headMay (parsedTelegram  ^.. _Just . dsmrFields . traverse . energyReturnedTariff2) `shouldBe` Just 0
@@ -210,7 +210,7 @@ testParser = do
 
       it "parsed telegram contains expected gasConsumption" $
         headMay (parsedTelegram  ^.. _Just . dsmrFields . traverse . gasConsumption) `shouldBe` Just (mkUTCTime (2020, 5, 29) (14, 00, 00), 05277.053)
-      
+
       it "produced a single telegram parsed event" $
         (length . filter (==True) . map isParsedEvent $ outputList) `shouldBe` 1
 
