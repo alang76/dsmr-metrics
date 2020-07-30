@@ -74,7 +74,10 @@ runUpdatePrometheusMetricsIO =
             UpdateActualPowerReturned       updateActualPowerReturned_       -> interpretSetGauge (metricGauge "dsmr_metrics_actual_power_returned_kw" "The actual power being returned in kW") updateActualPowerReturned_ 
             UpdateNumberOfPowerFailures     updateNumberOfPowerFailures_     -> interpretSetGauge (metricGauge "dsmr_metrics_number_of_power_failures_total" "The number of power failures") (fromIntegral updateNumberOfPowerFailures_)
             UpdateNumberOfPowerLongFailures updateNumberOfPowerLongFailures_ -> interpretSetGauge (metricGauge "dsmr_metrics_number_of_power_long_failures_total" "The number of long power failures" ) (fromIntegral updateNumberOfPowerLongFailures_)
-            UpdateActualCurrentConsumption  updateActualCurrentConsumption_  -> interpretSetGauge (metricGauge "dsmr_metrics_actual_current_consumption_amperes" "The actual current consumtion in A") (fromIntegral updateActualCurrentConsumption_)
+            UpdateActualCurrentConsumption  updateActualCurrentConsumption_  -> interpretSetGauge (metricGauge "dsmr_metrics_actual_current_consumption_amperes" "The actual current consumption in A") (fromIntegral updateActualCurrentConsumption_)
+            UpdateGasConsumption _          updateGasConsumptionVolume_      -> interpretSetGauge (metricGauge "dsmr_metrics_gas_consumption_m3" "The gas consumed in m3") updateGasConsumptionVolume_
+{-- As vector:
             UpdateGasConsumption            updateGasConsumptionTimeStamp 
                                             updateGasConsumptionVolume       -> interpretSetVector metricVectorGasConsumption (pack . show $ updateGasConsumptionTimeStamp) (`PM.setGauge` updateGasConsumptionVolume)
+--}
             UpdateNothing -> pure ()
