@@ -26,7 +26,7 @@ metricVectorGasConsumption :: PM.Vector Text PM.Gauge
 metricVectorGasConsumption = 
                PM.unsafeRegister
              $ PM.vector (pack "timestamp") 
-             $ PM.gauge (PM.Info "dsmr-metrics_gas_consumption_m3" "The gas consumption in m3 at the time of timestamp")
+             $ PM.gauge (PM.Info "dsmr-metrics_gas_consumption" "The gas consumption in m3 at the time of timestamp")
 
 metricGauge :: Text -> Text -> PM.Gauge
 metricGauge gaugeId gaugeDescription = PM.unsafeRegister
