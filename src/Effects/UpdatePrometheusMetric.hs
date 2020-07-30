@@ -26,7 +26,7 @@ metricVectorGasConsumption :: PM.Vector Text PM.Gauge
 metricVectorGasConsumption = 
                PM.unsafeRegister
              $ PM.vector (pack "timestamp") 
-             $ PM.gauge (PM.Info "dsmr_metrics_gas_consumption" "The gas consumption in m3 at the time of timestamp")
+             $ PM.gauge (PM.Info "dsmr_metrics_gas_consumption_m3" "The gas consumption in m3 at the time of timestamp")
 
 metricGauge :: Text -> Text -> PM.Gauge
 metricGauge gaugeId gaugeDescription = PM.unsafeRegister
@@ -73,7 +73,7 @@ runUpdatePrometheusMetricsIO =
             UpdateActualPowerConsumption    updateActualPowerConsumption_    -> interpretSetGauge (metricGauge "dsmr_metrics_actual_power_consumption_kw" "The actual power consumption in kW") updateActualPowerConsumption_
             UpdateActualPowerReturned       updateActualPowerReturned_       -> interpretSetGauge (metricGauge "dsmr_metrics_actual_power_returned_kw" "The actual power being returned in kW") updateActualPowerReturned_ 
             UpdateNumberOfPowerFailures     updateNumberOfPowerFailures_     -> interpretSetGauge (metricGauge "dsmr_metrics_number_of_power_failures_total" "The number of power failures") (fromIntegral updateNumberOfPowerFailures_)
-            UpdateNumberOfPowerLongFailures updateNumberOfPowerLongFailures_ -> interpretSetGauge (metricGauge "dsmr_metrics_number_ofpower_long_failures_total" "The number of long power failures" ) (fromIntegral updateNumberOfPowerLongFailures_)
+            UpdateNumberOfPowerLongFailures updateNumberOfPowerLongFailures_ -> interpretSetGauge (metricGauge "dsmr_metrics_number_of_power_long_failures_total" "The number of long power failures" ) (fromIntegral updateNumberOfPowerLongFailures_)
             UpdateActualCurrentConsumption  updateActualCurrentConsumption_  -> interpretSetGauge (metricGauge "dsmr_metrics_actual_current_consumption_amperes" "The actual current consumtion in A") (fromIntegral updateActualCurrentConsumption_)
             UpdateGasConsumption            updateGasConsumptionTimeStamp 
                                             updateGasConsumptionVolume       -> interpretSetVector metricVectorGasConsumption (pack . show $ updateGasConsumptionTimeStamp) (`PM.setGauge` updateGasConsumptionVolume)
