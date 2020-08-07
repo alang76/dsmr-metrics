@@ -11,9 +11,10 @@ import qualified Polysemy as P
 import qualified Polysemy.Error as P
 import Control.Exception(bracket, IOException)
 import Control.Applicative((<|>))
+import Control.Lens((^.))
 import System.Hardware.Serialport (SerialPort, openSerial, closeSerial, recv, defaultSerialSettings, CommSpeed(..), commSpeed)
 import Effects.Env(Env, getConfiguration)
-import Configuration(Configuration(..), SerialConfig(..), BaudRate(..), serialBaudRate, serialPort)
+import Configuration(Configuration(..), SerialConfig(..), BaudRate(..), baudRate, port)
 import qualified Data.ByteString.Char8 as B
 import Data.Void (Void)
 import Data.List(foldl')
@@ -63,13 +64,13 @@ extractTelegram telegram =
     Left _ -> Nothing
     Right t -> Just t
 
-readTelegramSerial :: SerialPort -> IO String
-readTelegramSerial s = readTelegramSerial' s ""
+readTelegramSerial :: Int -> SerialPort -> IO String
+readTelegramSerial bufferSize s = readTelegramSerial' s ""
   where
     readTelegramSerial' :: SerialPort -> String -> IO String
     readTelegramSerial' s' buffer = do
       lineInputBS <- recv s' 5000
-      let maxTelegramSize = 40000 --TODO: make configurable
+      let maxTelegramSize = bufferSize
           buffer' = buffer ++ B.unpack lineInputBS
           maybeTelegram = extractTelegram buffer'
       case maybeTelegram of
@@ -80,11 +81,11 @@ runTelegramReaderSerial :: P.Members '[Env, P.Embed IO, P.Error DsmrMetricExcept
 runTelegramReaderSerial = P.interpret $ \case
   ReadTelegram -> do
     cfg <- getConfiguration
-    let serCfg = serialConfig cfg
-    let (port, baudRate) = (\c -> (serialPort c, serialBaudRate c)) serCfg
+    let (port', baudRate', bufferSize') = (\c -> (port c, baudRate c, bufferSize c)) $ serialConfig cfg
     let handleSerialException = P.fromExceptionVia (\(e :: IOException) -> SerialPortException (show e))
-    let openSerialPort = openSerial port defaultSerialSettings {commSpeed = toCommSpeed(baudRate)} 
-    handleSerialException $ bracket openSerialPort closeSerial readTelegramSerial  -- TODO: prevent serial port from having to be opened and closed each time
+    let openSerialPort = openSerial port' defaultSerialSettings {commSpeed = toCommSpeed baudRate'} 
+    
+    handleSerialException $ bracket openSerialPort closeSerial (readTelegramSerial bufferSize')  -- TODO: prevent serial port from having to be opened and closed each time
 {-# INLINE runTelegramReaderSerial #-}
 
 toCommSpeed :: BaudRate -> CommSpeed

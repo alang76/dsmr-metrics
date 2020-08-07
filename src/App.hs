@@ -5,7 +5,7 @@ where
 
 import Prelude hiding (log)
 import Data.Hashable(hash)
-import Control.Monad (forever)
+import Control.Monad (replicateM_) --forever
 import Colog.Polysemy (Log, log)
 import Effects.DsmrTelegramReader(DsmrTelegramReader(..))
 import Effects.Async(Async(..), async,awaitAny,cancel)
@@ -15,7 +15,7 @@ import qualified Polysemy.Error as P
 import qualified Network.Wai.Middleware.Prometheus as PM
 import Model.DsmrTelegram(DsmrTelegram(..), DsmrField(..))
 import DsmrTelegramParser(runDsmrParser)
-import Effects.MetricsWebServer(MetricsWebServer, runMetricsServer)
+import Effects.ServeMetrics(ServeMetrics, serveMetrics,  runPrometheusMetricsServerIO)
 import Effects.UpdatePrometheusMetric(
     UpdatePrometheusMetric,
     updateEnergyConsumedTariff1,
@@ -69,19 +69,6 @@ runOutputAsLogAction = P.reinterpret $  \case
   P.Output event -> log @String (show event)
 {-# INLINE runOutputAsLogAction #-}
 
-metricsServer :: P.Members '[MetricsWebServer, P.Output DsmrMetricEvent, Env, P.Error DsmrMetricException] r => P.Sem r ()
-metricsServer = do
-    cfg <- getConfiguration
-    let port = listenPort . webServerConfig $ cfg
-    P.output . CheckPoint $ "Listening at http://localhost:" ++ show port ++ "/"
-    -- Register the GHC runtime metrics. For these to work, the app must be run
-    -- with the `+RTS -T` command line options.
-
-    -- Instrument the app with the prometheus middlware using the default
-    -- `PrometheusSettings`. This will cause the app to dump the metrics when
-    -- the /metrics endpoint is accessed.
-    runMetricsServer port (PM.prometheus PM.def PM.metricsApp)
-
 readAndParseTelegram :: P.Members '[Env, DsmrTelegramReader, P.Output DsmrMetricEvent] r => (Maybe DsmrTelegram -> P.Sem r a) -> P.Sem r a
 readAndParseTelegram callback = do
   telegram <- readTelegram
@@ -90,7 +77,7 @@ readAndParseTelegram callback = do
 
 runApp :: P.Members '[
     Async
-  , MetricsWebServer
+  , ServeMetrics
   , P.Output DsmrMetricEvent
   , DsmrTelegramReader
   , UpdatePrometheusMetric
@@ -98,9 +85,10 @@ runApp :: P.Members '[
   , Env] r => P.Sem r ()
 runApp = do
   P.output ProgramStarted
-  metricsThread <- async metricsServer
-  P.output $ MetricsWebServerThreadStarted (hash metricsThread)
-  readDsmrThread <- async . forever $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
+  metricsThread <- async serveMetrics
+  P.output $ MetricsServerThreadStarted (hash metricsThread)
+  --readDsmrThread <- async . forever $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
+  readDsmrThread <- async . (replicateM_ 10) $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
   P.output $ DsmrTelegramReaderThreadStarted (hash readDsmrThread)
   (completedThreadId, _) <- fmap (\(thread, res) -> (hash $ thread, res)) $  awaitAny [metricsThread, readDsmrThread]
   P.output $ ThreadTerminated completedThreadId

@@ -11,7 +11,7 @@ type ThreadID = Int
 data DsmrMetricEvent
   = ProgramStarted
   | DsmrTelegramReaderThreadStarted ThreadID
-  | MetricsWebServerThreadStarted ThreadID
+  | MetricsServerThreadStarted ThreadID
   | ThreadTerminated ThreadID
   | DsmrTelegramReceived String
   | DsmrTelegramParseError String
@@ -22,11 +22,10 @@ data DsmrMetricEvent
   | ProgramTerminated
   deriving Eq
 
-
 instance Show DsmrMetricEvent where
   show ProgramStarted = "Program started"
   show (DsmrTelegramReaderThreadStarted threadID) = "Started DSMR reading thread, thread id: " ++ show threadID
-  show (MetricsWebServerThreadStarted threadID) = "Started metrics serving thread, thread id: " ++ show threadID
+  show (MetricsServerThreadStarted threadID) = "Started metrics serving thread, thread id: " ++ show threadID
   show (ThreadTerminated threadID) = "Thread was terminated, thread id: " ++ show threadID
   show (DsmrTelegramReceived dsmrTelegramStr) = "Received a telegram: " ++ dsmrTelegramStr
   show (DsmrTelegramParseError parseErrorStr) = "Failed to parse telegram input: " ++ parseErrorStr

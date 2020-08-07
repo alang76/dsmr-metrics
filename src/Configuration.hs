@@ -30,8 +30,9 @@ data Configuration = Configuration {
 data LogLevel = Debug | Warning | Info | Error | Critical deriving Show
 
 data SerialConfig = SerialConfig {
-    serialPort :: String, --"/dev/ttyUSB0" (Linux), "COM 3" (Windows)
-    serialBaudRate :: BaudRate
+    port :: String, --"/dev/ttyUSB0" (Linux), "COM 3" (Windows)
+    baudRate :: BaudRate,
+    bufferSize :: Int
 } deriving (Show)
 
 data WebServerConfig = WebServerConfig {
@@ -77,6 +78,7 @@ instance FromJSON SerialConfig where
     parseJSON (Object obj) = SerialConfig
         <$> obj .: "port"
         <*> obj .: "baudrate"
+        <*> obj .: "bufferSize"
     parseJSON obj = fail $ show obj
 
 instance FromJSON Configuration where

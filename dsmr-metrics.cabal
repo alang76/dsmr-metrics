@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e7ceb581933d57cdfced2f71cacece6addb5ee2e3ca1730c05e7074f26fa9035
+-- hash: 9ceff10ec0b0d4420fbc6a5c0faa341771fb4c937c0b590fd6ea459031c45690
 
 name:           dsmr-metrics
 version:        0.1.0.0
@@ -34,7 +34,7 @@ library
       Effects.Async
       Effects.DsmrTelegramReader
       Effects.Env
-      Effects.MetricsWebServer
+      Effects.ServeMetrics
       Effects.UpdatePrometheusMetric
       Events.DsmrMetricEvent
       Exceptions.DsmrMetricException
