@@ -9,13 +9,13 @@ import App (runApp)
 import Data.Function((&))
 
 import Effects.DsmrTelegramReader(DsmrTelegramReader)
-import Effects.MetricsWebServer(MetricsWebServer)
+import Effects.ServeMetrics(ServeMetrics)
 import Effects.UpdatePrometheusMetric(UpdatePrometheusMetric)
 import Effects.Env(Env)
 
 import TestEffects.Env(runEnvPureTest, runEnvPureTestConfigThrows)
 import TestEffects.DsmrTelegramReader(runTelegramReaderFakePure)
-import TestEffects.MetricsWebServer(runWebServerFakePure) --runWebServerFakeIO
+import TestEffects.ServeMetrics(runMetricsServerFakePure) --runMetricsServerFakeIO
 import TestEffects.UpdatePrometheusMetric(runUpdatePrometheusMetricsFake)
 import Safe(headMay)
 import Effects.Async(asyncToIO)
@@ -25,13 +25,13 @@ import qualified Polysemy.Error as P
 import Exceptions.DsmrMetricException(DsmrMetricException(..))
 import Events.DsmrMetricEvent(DsmrMetricEvent(..), ThreadID)
 
-simulateMain :: (forall r. P.Sem (MetricsWebServer ': r) () -> P.Sem r ())
+simulateMain :: (forall r. P.Sem (ServeMetrics ': r) () -> P.Sem r ())
              -> (forall r. P.Member Env r => P.Sem (DsmrTelegramReader ': r) () -> P.Sem r ())
              -> (forall r. P.Member (P.Error DsmrMetricException) r => P.Sem (Env ': r) () -> P.Sem r ())
              -> (forall r. P.Sem (UpdatePrometheusMetric ': r) () -> P.Sem (P.Output String ': r) ())
              -> IO ([DsmrMetricEvent], Either DsmrMetricException ([String], ()))
-simulateMain webServerEffect telegramReaderEffect envEffect updateMetricEffect = runApp
-                & webServerEffect
+simulateMain serveMetricsEffect telegramReaderEffect envEffect updateMetricEffect = runApp
+                & serveMetricsEffect
                 & telegramReaderEffect
                 & envEffect
                 & updateMetricEffect
@@ -51,12 +51,12 @@ isProgramTerminated ProgramTerminated = True
 isProgramTerminated _ = False
 
 getThreadID :: DsmrMetricEvent -> Maybe ThreadID
-getThreadID (MetricsWebServerThreadStarted threadID) = Just threadID
+getThreadID (MetricsServerThreadStarted threadID) = Just threadID
 getThreadID (DsmrTelegramReaderThreadStarted threadID) = Just threadID
 getThreadID _ = Nothing
 
 isMetricsWebServerThreadStarted :: DsmrMetricEvent -> Bool
-isMetricsWebServerThreadStarted (MetricsWebServerThreadStarted _) = True
+isMetricsWebServerThreadStarted (MetricsServerThreadStarted _) = True
 isMetricsWebServerThreadStarted _ = False
 
 isThreadTerminated :: Maybe ThreadID -> DsmrMetricEvent -> Bool
@@ -73,8 +73,8 @@ testApp :: IO ()
 testApp = do
   hspec $
     describe "TestApp" $ do
-      (events, _)           <- runIO $ simulateMain runWebServerFakePure runTelegramReaderFakePure runEnvPureTest             runUpdatePrometheusMetricsFake
-      (_ , resConfigThrown) <- runIO $ simulateMain runWebServerFakePure runTelegramReaderFakePure runEnvPureTestConfigThrows runUpdatePrometheusMetricsFake
+      (events, _)           <- runIO $ simulateMain runMetricsServerFakePure runTelegramReaderFakePure runEnvPureTest             runUpdatePrometheusMetricsFake
+      (_ , resConfigThrown) <- runIO $ simulateMain runMetricsServerFakePure runTelegramReaderFakePure runEnvPureTestConfigThrows runUpdatePrometheusMetricsFake
 
       it "Received program started event just once" $
         ((>0) . length . filter isProgramStarted $ events) `shouldBe` True

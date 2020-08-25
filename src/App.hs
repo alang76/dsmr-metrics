@@ -37,6 +37,9 @@ import Effects.DsmrTelegramReader(readTelegram)
 import Events.DsmrMetricEvent(DsmrMetricEvent(..))
 import Exceptions.DsmrMetricException(DsmrMetricException(..))
 
+-- TODO: remove once https://github.com/polysemy-research/polysemy/pull/372 gets integrated
+import Polysemy.Internal(Sem(..), runSem)
+
 processCallbackUpdatePrometheusMetrics :: P.Members '[P.Output DsmrMetricEvent, UpdatePrometheusMetric] r => Maybe DsmrTelegram -> P.Sem r ()
 processCallbackUpdatePrometheusMetrics Nothing = pure ()
 processCallbackUpdatePrometheusMetrics (Just (DsmrTelegram _ fields _)) = mapM_ fieldToMetric fields
@@ -75,6 +78,12 @@ readAndParseTelegram callback = do
   parseResult <- runDsmrParser telegram
   callback parseResult
 
+-- TODO: remove once https://github.com/polysemy-research/polysemy/pull/372 gets integrated
+forever'     :: P.Sem r a -> P.Sem r b
+{-# INLINE forever' #-}
+forever' a   = let a' = a `mySeq` a' in a'
+  where mySeq ma mb = Sem $ \k -> runSem ma k *> runSem mb k
+
 runApp :: P.Members '[
     Async
   , ServeMetrics
@@ -87,8 +96,8 @@ runApp = do
   P.output ProgramStarted
   metricsThread <- async serveMetrics
   P.output $ MetricsServerThreadStarted (hash metricsThread)
-  --readDsmrThread <- async . forever $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
-  readDsmrThread <- async . (replicateM_ 10) $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
+  readDsmrThread <- async . forever' $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
+  --readDsmrThread <- async . (replicateM_ 500) $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
   P.output $ DsmrTelegramReaderThreadStarted (hash readDsmrThread)
   (completedThreadId, _) <- fmap (\(thread, res) -> (hash $ thread, res)) $  awaitAny [metricsThread, readDsmrThread]
   P.output $ ThreadTerminated completedThreadId

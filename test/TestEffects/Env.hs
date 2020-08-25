@@ -16,8 +16,9 @@ testConfig :: Configuration
 testConfig = 
   Configuration {
     serialConfig = SerialConfig { 
-      serialPort = "/dev/fake", 
-      serialBaudRate = BR110 },
+      port = "/dev/fake", 
+      baudRate = BR115200,
+      bufferSize = 40000},
     webServerConfig = WebServerConfig {
       listenPort = 3000
     }

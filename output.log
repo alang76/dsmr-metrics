@@ -1,5 +1,0 @@
-Program started
-Started metrics serving thread, thread id: 839657738087498302
-Started DSMR reading thread, thread id: 839657738087498293
-Checkpoint: Starting prometheus metrics server at http://localhost:3050/
-Fatal exception: SerialPortException "/dev/ttyUSB0: openFd: does not exist (No such file or directory)"

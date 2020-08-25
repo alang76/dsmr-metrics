@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9ceff10ec0b0d4420fbc6a5c0faa341771fb4c937c0b590fd6ea459031c45690
+-- hash: 690ae4ebef351a530bec4c6b345f911bd2b3bd2a4cf2cfa4ce68444a5635ca99
 
 name:           dsmr-metrics
 version:        0.1.0.0
@@ -112,7 +112,7 @@ test-suite dsmr-metrics-test
       TelegramBuilder
       TestEffects.DsmrTelegramReader
       TestEffects.Env
-      TestEffects.MetricsWebServer
+      TestEffects.ServeMetrics
       TestEffects.UpdatePrometheusMetric
       TimeSpec
       Paths_dsmr_metrics
