@@ -4,7 +4,7 @@ import Colog.Polysemy (runLogAction)
 import Colog.Core.Action(LogAction(..))
 import Control.Monad.IO.Class(MonadIO, liftIO)
 import System.IO(hFlush, stdout)
-import Effects.DsmrTelegramReader(runTelegramReaderSerial)
+import Effects.DsmrTelegramReader(runTelegramReaderSerial) --runTelegramReaderFake
 import Effects.ServeMetrics(runPrometheusMetricsServerIO)
 import Effects.UpdatePrometheusMetric(runUpdatePrometheusMetricsIO)
 import Effects.Env(runEnvIO)
@@ -21,7 +21,7 @@ runHandled :: P.Members '[P.Output DsmrMetricEvent, P.Final IO, P.Embed IO] r =>
 runHandled = do
   res <- runApp
     & runPrometheusMetricsServerIO
-    & runTelegramReaderSerial
+    & runTelegramReaderSerial -- runTelegramReaderFake
     & runEnvIO
     & runUpdatePrometheusMetricsIO
     & AE.asyncToIO

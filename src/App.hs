@@ -82,7 +82,7 @@ readAndParseTelegram callback = do
 forever'     :: P.Sem r a -> P.Sem r b
 {-# INLINE forever' #-}
 forever' a   = let a' = a `mySeq` a' in a'
-  where mySeq ma mb = Sem $ \k -> runSem ma k *> runSem mb k
+  where mySeq ma mb = Sem $ \k -> runSem ma k >>= \_ -> runSem mb k
 
 runApp :: P.Members '[
     Async
@@ -97,7 +97,7 @@ runApp = do
   metricsThread <- async serveMetrics
   P.output $ MetricsServerThreadStarted (hash metricsThread)
   readDsmrThread <- async . forever' $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
-  --readDsmrThread <- async . (replicateM_ 500) $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
+  --readDsmrThread <- async . (replicateM_ 5000) $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
   P.output $ DsmrTelegramReaderThreadStarted (hash readDsmrThread)
   (completedThreadId, _) <- fmap (\(thread, res) -> (hash $ thread, res)) $  awaitAny [metricsThread, readDsmrThread]
   P.output $ ThreadTerminated completedThreadId
