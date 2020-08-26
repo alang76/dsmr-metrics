@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 69df3b9913962c03ac2efe181c0b97494601347115d5004c6353a7e3d3e24524
+-- hash: b95d8ee8c65f33670f53f8eeebace7411ada7c0b64740a73169a2496777e8269
 
 name:           dsmr-metrics
 version:        0.1.0.0
@@ -74,7 +74,7 @@ executable dsmr-metrics-exe
   hs-source-dirs:
       app
   default-extensions: DataKinds FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables TypeApplications TypeOperators TypeFamilies TemplateHaskell
-  ghc-options: -threaded -rtsopts "-with-rtsopts=-T -N" -fplugin=Polysemy.Plugin -O2 -flate-specialise -fspecialise-aggressively -Wall
+  ghc-options: -threaded -rtsopts "-with-rtsopts=-T -N" -fplugin=Polysemy.Plugin -O2 -flate-specialise -fspecialise-aggressively -Wall -Werror
   build-depends:
       aeson >=1.4.7.1 && <1.5
     , async >=2.2.2 && <2.3

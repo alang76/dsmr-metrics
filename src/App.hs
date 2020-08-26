@@ -6,7 +6,6 @@ where
 import Prelude hiding (log)
 import Data.Hashable(hash)
 import Control.Monad (forever) -- replicateM_
-import Data.Function((&))
 import Effects.DsmrTelegramReader(DsmrTelegramReader(..), readTelegram)
 import Effects.Async(Async(..), async,awaitAny,cancel)
 import qualified Polysemy as P
