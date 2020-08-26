@@ -1,13 +1,13 @@
 module App (
     runApp,
-    runOutputAsLogAction)
+    runOutputIO)
 where
 
 import Prelude hiding (log)
 import Data.Hashable(hash)
-import Control.Monad (replicateM_) --forever
-import Colog.Polysemy (Log, log)
-import Effects.DsmrTelegramReader(DsmrTelegramReader(..))
+import Control.Monad (forever) -- replicateM_
+import Data.Function((&))
+import Effects.DsmrTelegramReader(DsmrTelegramReader(..), readTelegram)
 import Effects.Async(Async(..), async,awaitAny,cancel)
 import qualified Polysemy as P
 import qualified Polysemy.Output as P
@@ -33,12 +33,9 @@ import Effects.UpdatePrometheusMetric(
     )
 import Effects.Env(Env, getConfiguration)
 import Configuration(webServerConfig, listenPort)
-import Effects.DsmrTelegramReader(readTelegram)
 import Events.DsmrMetricEvent(DsmrMetricEvent(..))
 import Exceptions.DsmrMetricException(DsmrMetricException(..))
-
--- TODO: remove once https://github.com/polysemy-research/polysemy/pull/372 gets integrated
-import Polysemy.Internal(Sem(..), runSem)
+import System.Mem(performMajorGC)
 
 processCallbackUpdatePrometheusMetrics :: P.Members '[P.Output DsmrMetricEvent, UpdatePrometheusMetric] r => Maybe DsmrTelegram -> P.Sem r ()
 processCallbackUpdatePrometheusMetrics Nothing = pure ()
@@ -67,22 +64,18 @@ processCallbackUpdatePrometheusMetrics (Just (DsmrTelegram _ fields _)) = mapM_ 
       fieldToMetric (GasMeterSerialNumber _)                                          = updateNothing
       fieldToMetric (GasConsumption (gasConsumptionTimeStamp,gasConsumptionVolume))   = updateGasConsumption gasConsumptionTimeStamp gasConsumptionVolume
 
-runOutputAsLogAction :: P.Sem (P.Output DsmrMetricEvent:r) a -> P.Sem (Log String:r) a
-runOutputAsLogAction = P.reinterpret $  \case
-  P.Output event -> log @String (show event)
-{-# INLINE runOutputAsLogAction #-}
+runOutputIO :: P.Member (P.Embed IO) r => P.Sem (P.Output DsmrMetricEvent:r) a -> P.Sem r a
+runOutputIO = P.interpret $  \case
+  P.Output event -> P.embed . putStrLn $ show event
+{-# INLINE runOutputIO #-}
 
-readAndParseTelegram :: P.Members '[Env, DsmrTelegramReader, P.Output DsmrMetricEvent] r => (Maybe DsmrTelegram -> P.Sem r a) -> P.Sem r a
+readAndParseTelegram :: P.Members '[Env, DsmrTelegramReader, P.Output DsmrMetricEvent, P.Embed IO] r => (Maybe DsmrTelegram -> P.Sem r a) -> P.Sem r a
 readAndParseTelegram callback = do
   telegram <- readTelegram
   parseResult <- runDsmrParser telegram
-  callback parseResult
-
--- TODO: remove once https://github.com/polysemy-research/polysemy/pull/372 gets integrated
-forever'     :: P.Sem r a -> P.Sem r b
-{-# INLINE forever' #-}
-forever' a   = let a' = a `mySeq` a' in a'
-  where mySeq ma mb = Sem $ \k -> runSem ma k >>= \_ -> runSem mb k
+  res <- callback parseResult
+  P.embed performMajorGC
+  return res
 
 runApp :: P.Members '[
     Async
@@ -91,15 +84,17 @@ runApp :: P.Members '[
   , DsmrTelegramReader
   , UpdatePrometheusMetric
   , P.Error DsmrMetricException
-  , Env] r => P.Sem r ()
+  , Env
+  , P.Embed IO] r => P.Sem r ()
 runApp = do
   P.output ProgramStarted
   metricsThread <- async serveMetrics
   P.output $ MetricsServerThreadStarted (hash metricsThread)
-  readDsmrThread <- async . forever' $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
-  --readDsmrThread <- async . (replicateM_ 5000) $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
+  -- run the output effect per iteration, to prevent space leaking
+  readDsmrThread <- async . forever . runOutputIO $ readAndParseTelegram processCallbackUpdatePrometheusMetrics
+  --readDsmrThread <- async . replicateM_ 1000 $  readAndParseTelegram processCallbackUpdatePrometheusMetrics
   P.output $ DsmrTelegramReaderThreadStarted (hash readDsmrThread)
-  (completedThreadId, _) <- fmap (\(thread, res) -> (hash $ thread, res)) $  awaitAny [metricsThread, readDsmrThread]
+  (completedThreadId, _) <- (\(thread, res) -> (hash thread, res)) <$> awaitAny [metricsThread, readDsmrThread]
   P.output $ ThreadTerminated completedThreadId
   P.output ProgramTerminated 
   -- kill all threads when one of the main threads ended

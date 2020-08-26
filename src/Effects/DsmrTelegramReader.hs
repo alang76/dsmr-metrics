@@ -121,7 +121,7 @@ telegram =
     \!7B6A\n"
 
 
-runTelegramReaderFake :: P.Members '[Env, P.Embed IO, P.Error DsmrMetricException] r => P.Sem (DsmrTelegramReader ': r) a -> P.Sem r a
+runTelegramReaderFake :: P.Sem (DsmrTelegramReader ': r) a -> P.Sem r a
 runTelegramReaderFake = P.interpret $ \case
   ReadTelegram -> return telegram
 {-# INLINE runTelegramReaderFake #-}

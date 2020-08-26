@@ -184,7 +184,7 @@ valueTimestampParserP = do
     timeStr <- (++) <$> count 12 digitChar <*> (string "S" <|> string "W")
     return $ fromJust $ localTimeStampToUTC timeZone century timeStr
 
-runDsmrParser :: P.Members '[Env, P.Output DsmrMetricEvent] r => String -> P.Sem r (Maybe DsmrTelegram)
+runDsmrParser :: P.Members '[Env,P.Output DsmrMetricEvent] r => String -> P.Sem r (Maybe DsmrTelegram)
 runDsmrParser input = do
   parser <- dsmrTelegramParserP
   let parseResult = parse parser "" input
