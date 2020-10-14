@@ -11,4 +11,4 @@ Mainly used as a learning vehicle for getting acquinted with these libraries:
 
 Here's my dash:
 
-![My Dash](images/dsmr-metrics-dash.png?raw=true "My Dash")
+![My Dash](img/dsmr-metrics-dash.png?raw=true "My Dash")
