@@ -4,7 +4,7 @@ Utility to read DSMR telegrams from the P1 port of a smart energy meter over a s
 
 Note: the manufacturer specific stuff (mainly the telegram header) probably needs to be less picky. 
 
-Mainly used as a learning vehicle for getting acquinted with these libraries:
+Mainly used as a learning vehicle for getting acquainted with these libraries:
 
 * [Polysemy](https://hackage.haskell.org/package/polysemy) as the effect system
 * [Hedgehog](https://hackage.haskell.org/package/hedgehog) as the property based testing tool
